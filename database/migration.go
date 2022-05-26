@@ -7,7 +7,7 @@ import (
 	"reimbursement_backend/config"
 )
 
-func runMigrationUp() {
+func RunMigrationUp() {
 	driver, err := postgres.WithInstance(GetDatabase(), &postgres.Config{})
 	if err != nil {
 		config.SugarLogger.Error(err)
@@ -22,7 +22,7 @@ func runMigrationUp() {
 	}
 }
 
-func runMigrationDown() {
+func RunMigrationDown() {
 	driver, err := postgres.WithInstance(GetDatabase(), &postgres.Config{})
 	if err != nil {
 		config.SugarLogger.Error(err)
