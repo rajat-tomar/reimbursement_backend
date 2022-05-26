@@ -15,8 +15,13 @@ type Database struct {
 	Port     int
 }
 
+type Log struct {
+	Level string
+}
+
 type Configuration struct {
 	Database Database
+	Log      Log
 }
 
 func InitConfig() {
