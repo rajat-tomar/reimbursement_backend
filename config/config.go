@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"log"
 )
 
 var configuration *Configuration
@@ -42,6 +41,6 @@ func InitConfiguration() {
 	}
 	err := viper.Unmarshal(&configuration)
 	if err != nil {
-		log.Fatal(err)
+		SugarLogger.Error(err)
 	}
 }
