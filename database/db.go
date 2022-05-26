@@ -23,7 +23,6 @@ func ConnectToDatabase() {
 	if err != nil {
 		config.SugarLogger.Error("Error in database ping.", err)
 	}
-	defer db.Close()
 }
 
 func CloseDatabase() {

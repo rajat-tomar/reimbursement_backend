@@ -35,7 +35,7 @@ func init() {
 	rootCmd.AddCommand(migrateDownCommand)
 }
 
-func Execute() {
+func ExecuteCommands() {
 	err := rootCmd.Execute()
 	if err != nil {
 		config.SugarLogger.Error(err)
