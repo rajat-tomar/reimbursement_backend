@@ -1,6 +1,6 @@
 DATABASE:
   USER: postgres
-  DB_NAME: database_name
+  DBNAME: database_name
   HOST: localhost
   PASSWORD: postgres
   PORT: 5432
