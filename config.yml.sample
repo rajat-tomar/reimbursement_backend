@@ -1,7 +1,7 @@
 DATABASE:
   USER: postgres
   DB_NAME: database_name
-  HOST: postgres
+  HOST: localhost
   PASSWORD: postgres
   PORT: 5432
 LOG:
