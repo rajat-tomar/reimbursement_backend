@@ -3,6 +3,7 @@ module reimbursement_backend
 go 1.18
 
 require (
+	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/lib/pq v1.10.6
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.1
@@ -12,6 +13,8 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
