@@ -50,13 +50,13 @@ jobs:
         env:
           SSH_PUBLIC: ${{secrets.SSH_PUBLIC}}
           SSH_PRIVATE: ${{secrets.SSH_PRIVATE}}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_HOST: ${{secrets.SSH_HOST}}
         run: |
           mkdir ~/.ssh
           echo $SSH_PUBLIC > ~/.ssh/id_rsa.pub
           echo "${{secrets.SSH_PRIVATE}}" > ~/.ssh/id_rsa
           echo $SSH_HOST > ~/.ssh/known_hosts
-          chmod 400 ~/.ssh/id_rsa
-          ls .ssh
+          chmod 600 ~/.ssh/id_rsa
+          ls ~/.ssh
       - name: Connect to Instance
         run: ssh sanjay@35.200.199.253
