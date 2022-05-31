@@ -50,18 +50,13 @@ jobs:
         env:
           SSH_PUBLIC: ${{secrets.SSH_PUBLIC}}
           SSH_PRIVATE: ${{secrets.SSH_PRIVATE}}
-          HOST_SSH: ${{ secrets.SSH_HOST }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           mkdir ~/.ssh
           echo $SSH_PUBLIC > ~/.ssh/id_rsa.pub
           echo "${{secrets.SSH_PRIVATE}}" > ~/.ssh/id_rsa
-          echo $HOST_SSH > ~/.ssh/known_hosts
+          echo $SSH_HOST > ~/.ssh/known_hosts
           chmod 400 ~/.ssh/id_rsa
-      - name: Move & Replace File to Remote Instance
-        run: scp reimbursement_backend sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
+          ls .ssh
       - name: Connect to Instance
         run: ssh sanjay@35.200.199.253
-      - name: Run The Binary
-        run: ./helloWorld &
-      - name: Run The Binary
-        run: curl http://localhost:9000/hello
