@@ -58,5 +58,7 @@ jobs:
           echo $SSH_HOST > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_rsa
           ls ~/.ssh
+      - name: Move Binary to Remote Instance
+        run: scp reimbursement_backend sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
       - name: Connect to Instance
-        run: ssh sanjay@35.200.199.253
+        run: ssh -o StrictHostKeyChecking=no sanjay@35.200.199.253
