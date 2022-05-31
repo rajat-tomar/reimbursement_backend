@@ -2,10 +2,9 @@ name: Reimbursement Project
 on:
   push:
     branches: [ main ]
-
 jobs:
   build:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -32,7 +31,7 @@ jobs:
           sudo mv migrate.linux-amd64 /usr/bin/migrate
 
       - name: Build Project
-        run: go build -v ./...
+        run: go build -v .
 
       - name: Run Migrations
         run: make migrate-up
@@ -40,16 +39,29 @@ jobs:
       - name: Run Tests
         run: go test -v ./...
 
-  create-vm:
+  deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Add SSH Key To Known Host
+      - uses: actions/checkout@v2
+      - name: Build
+        run: go build .
+      - name: Add SSH Key To Runner
         env:
           SSH_PUBLIC: ${{secrets.SSH_PUBLIC}}
           SSH_PRIVATE: ${{secrets.SSH_PRIVATE}}
           HOST_SSH: ${{ secrets.SSH_HOST }}
-        run: rm -rf .ssh && mkdir ~/.ssh && cd ~/.ssh && ls && echo $SSH_PUBLIC > id_rsa.pub &&  echo $SSH_PRIVATE > id_rsa && echo $HOST_SSH > known_hosts && chmod 400 ~/.ssh/id_rsa
-
-      - name: SSH connect to the timetracker instance
-        run: ssh rajat@35.200.199.253
+        run: |
+          mkdir ~/.ssh
+          echo $SSH_PUBLIC > ~/.ssh/id_rsa.pub
+          echo "${{secrets.SSH_PRIVATE}}" > ~/.ssh/id_rsa
+          echo $HOST_SSH > ~/.ssh/known_hosts
+          chmod 400 ~/.ssh/id_rsa
+      - name: Move & Replace File to Remote Instance
+        run: scp reimbursement_backend sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
+      - name: Connect to Instance
+        run: ssh sanjay@35.200.199.253
+      - name: Run The Binary
+        run: ./helloWorld &
+      - name: Run The Binary
+        run: curl http://localhost:9000/hello

@@ -14,7 +14,7 @@ func TestInitLogger(t *testing.T) {
 
 func TestGetLogLevel(t *testing.T) {
 	InitConfig()
-	InitConfiguration()
+	initConfigurationFromENV()
 	expectedLevel := zapcore.DebugLevel
 	actualLevel := getLogLevel()
 	assert.Equal(t, expectedLevel, actualLevel)

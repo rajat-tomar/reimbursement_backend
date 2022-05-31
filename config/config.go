@@ -33,7 +33,7 @@ func GetConfig() *Configuration {
 
 func InitConfiguration() {
 	viper.SetConfigName("config.yml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("./")
 	viper.AutomaticEnv()
 	viper.SetConfigType("yml")
 	if err := viper.ReadInConfig(); err != nil {

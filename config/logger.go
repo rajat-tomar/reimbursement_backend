@@ -23,8 +23,7 @@ func InitLogger() {
 }
 
 func getLogLevel() zapcore.Level {
-	level := configuration.Log.Level
-	switch strings.ToLower(level) {
+	switch strings.ToLower(configuration.Log.Level) {
 	case "debug":
 		return zapcore.DebugLevel
 	case "info":

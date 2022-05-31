@@ -11,9 +11,7 @@ var db *sql.DB
 
 func ConnectToDatabase() {
 	configuration := config.GetConfig()
-	fmt.Println(configuration)
 	postgresConnect := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", configuration.Database.User, configuration.Database.Password, configuration.Database.DbName)
-	fmt.Println(postgresConnect)
 	database, err := sql.Open("postgres", postgresConnect)
 	if err != nil {
 		config.SugarLogger.Error("Cannot connect to database.", err)
