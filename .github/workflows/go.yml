@@ -65,4 +65,4 @@ jobs:
       - name: Run The Binary
         run: ./reimbursement_backend &
       - name: Run The Binary
-        run: curl http://localhost:9000/hello
+        run: curl http://localhost:8000/hello
