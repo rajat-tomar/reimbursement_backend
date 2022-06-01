@@ -59,6 +59,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ls ~/.ssh
       - name: Move Binary to Remote Instance
-        run: scp reimbursement_backend sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
+        run: scp reimbursement_backend -o StrictHostKeyChecking=no sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
       - name: Connect to Instance
         run: ssh -o StrictHostKeyChecking=no sanjay@35.200.199.253
+      - name: Run The Binary
+        run: ./reimbursement_backend &
+      - name: Run The Binary
+        run: curl http://localhost:9000/hello
