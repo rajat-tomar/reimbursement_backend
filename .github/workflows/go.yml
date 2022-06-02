@@ -78,6 +78,7 @@ jobs:
       - name: Remove previous binary and config.yml file from remote instance
         run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "rm -rf config.yml;rm -rf reimbursement_backend;"
       - name: Kill the process
+        continue-on-error: true
         run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "kill \$(lsof -t -i:9000)"
       - name: Move Binary to Remote Instance
         run: scp -o StrictHostKeyChecking=no reimbursement_backend sanjay@34.93.91.239:/home/sanjay/reimbursement_backend
