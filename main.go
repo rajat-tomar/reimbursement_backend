@@ -15,7 +15,7 @@ func httpServer() {
 	r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "This Is Our Golang Hello World Server")
 	})
-	if err := http.ListenAndServe(":8000", r); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8000", r); err != nil {
 		log.Fatal(err)
 	}
 }

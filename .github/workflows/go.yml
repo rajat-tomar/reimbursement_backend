@@ -38,14 +38,20 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+      - uses: actions/upload-artifact@master
+        with:
+          name: binary_file
+          path: reimbursement_backend
 
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
-        run: go build .
+      - uses: actions/download-artifact@v1
+        with:
+          name: binary_file
+          path: .
       - name: Add SSH Key To Runner
         env:
           SSH_PUBLIC: ${{secrets.SSH_PUBLIC}}
@@ -57,11 +63,27 @@ jobs:
           echo "${{secrets.SSH_PRIVATE}}" > ~/.ssh/id_rsa
           echo $SSH_HOST > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_rsa
-          ls ~/.ssh
+      - name: Create config.yml file
+        run: |
+          touch config.yml
+          echo "DATABASE:" >> config.yml
+          echo "  USER: ${{secrets.DB_USER}}" >> config.yml
+          echo "  DB_NAME: ${{secrets.DB_NAME}}" >> config.yml
+          echo "  HOST: ${{secrets.DB_HOST}}" >> config.yml
+          echo "  PASSWORD: ${{secrets.DB_PASSWORD}}" >> config.yml
+          echo "  PORT: ${{secrets.DB_PORT}}" >> config.yml
+          echo "LOG:" >> config.yml
+          echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yml
+      - name: Cat config
+        run: cat config.yml
       - name: Move Binary to Remote Instance
-        run: scp -o StrictHostKeyChecking=no reimbursement_backend sanjay@35.200.199.253:/home/sanjay/reimbursement_backend
-      - name: Connect to Instance
-        run: ssh -o StrictHostKeyChecking=no sanjay@35.200.199.253
+        run: scp -o StrictHostKeyChecking=no reimbursement_backend sanjay@34.93.91.239:/home/sanjay/reimbursement_backend
+      - name: Move config.yml File to Remote
+        run: scp -o StrictHostKeyChecking=no config.yml sanjay@34.93.91.239:/home/sanjay/config.yml
+      - name: Connect to Remote Instance
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239
+      - name: Change the file permission
+        run: chmod +777 reimbursement_backend
       - name: Run The Binary
         run: ./reimbursement_backend &
       - name: Run The Binary
