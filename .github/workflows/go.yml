@@ -75,19 +75,15 @@ jobs:
           echo "  PORT: ${{secrets.DB_PORT}}" >> config.yml
           echo "LOG:" >> config.yml
           echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yml
-      - name: Cat config
-        run: cat config.yml
+      - name: Remove previous binary and config.yml file from remote instance
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "rm -rf config.yml;rm -rf reimbursement_backend;"
+      - name: Kill the process
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "kill \$(lsof -t -i:9000)"
       - name: Move Binary to Remote Instance
         run: scp -o StrictHostKeyChecking=no reimbursement_backend sanjay@34.93.91.239:/home/sanjay/reimbursement_backend
       - name: Move config.yml File to Remote
         run: scp -o StrictHostKeyChecking=no config.yml sanjay@34.93.91.239:/home/sanjay/config.yml
-      - name: Connect to Remote Instance
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239
-      - name: Kill the previous running binary process
-        run: kill $(lsof -t -i:8000)
-      - name: Change the file permission
-        run: chmod +777 reimbursement_backend
-      - name: Run The Binary
-        run: ./reimbursement_backend &
-      - name: Make curl request
-        run: curl http://localhost:8000/hello
+      - name: Change file access mode
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "chmod +777 reimbursement_backend;chmod +777 config.yml;"
+      - name: Run the binary
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "./reimbursement_backend &"
