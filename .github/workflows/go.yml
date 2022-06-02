@@ -83,9 +83,11 @@ jobs:
         run: scp -o StrictHostKeyChecking=no config.yml sanjay@34.93.91.239:/home/sanjay/config.yml
       - name: Connect to Remote Instance
         run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239
+      - name: Kill the previous running binary process
+        run: kill $(lsof -t -i:8000)
       - name: Change the file permission
         run: chmod +777 reimbursement_backend
       - name: Run The Binary
         run: ./reimbursement_backend &
-      - name: Run The Binary
+      - name: Make curl request
         run: curl http://localhost:8000/hello
