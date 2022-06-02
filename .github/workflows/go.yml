@@ -85,6 +85,6 @@ jobs:
       - name: Move config.yml File to Remote
         run: scp -o StrictHostKeyChecking=no config.yml sanjay@34.93.91.239:/home/sanjay/config.yml
       - name: Change file access mode
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "chmod +777 reimbursement_backend;chmod +777 config.yml;"
+        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "chmod +x reimbursement_backend;chmod +x config.yml;"
       - name: Run the binary
         run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "./reimbursement_backend &"
