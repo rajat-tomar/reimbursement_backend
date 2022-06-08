@@ -92,4 +92,4 @@ jobs:
         run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "./reimbursement_backend &"
 
       - name: Logout
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "logout
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "logout"
