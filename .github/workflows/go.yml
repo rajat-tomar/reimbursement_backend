@@ -52,7 +52,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v1
         with:
-          path: ./
+          name: binary_file
+          path: .
       - name: Add SSH Key To Runner
         env:
           REIMBURSEMENT_PRIVATE_KEY: ${{secrets.REIMBURSEMENT_PRIVATE_KEY}}
