@@ -91,5 +91,5 @@ jobs:
       - name: Run the binary
         run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "./reimbursement_backend &"
 
-      - name: Logout
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "logout"
+      - name: Make Action exit from the instance after running binary in background
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "exit"
