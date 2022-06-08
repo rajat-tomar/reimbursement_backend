@@ -38,6 +38,7 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+
       - uses: actions/upload-artifact@master
         with:
           name: binary_file
@@ -55,14 +56,14 @@ jobs:
           path: .
       - name: Add SSH Key To Runner
         env:
-          SSH_PUBLIC: ${{secrets.SSH_PUBLIC}}
-          SSH_PRIVATE: ${{secrets.SSH_PRIVATE}}
-          SSH_HOST: ${{secrets.SSH_HOST}}
+#          REIMBURSEMENT_PUBLIC_KEY: ${{secrets.REIMBURSEMENT_PUBLIC_KEY}}
+          REIMBURSEMENT_PRIVATE_KEY: ${{secrets.REIMBURSEMENT_PRIVATE_KEY}}
+#          SSH_HOST: ${{secrets.SSH_HOST}}
         run: |
           mkdir ~/.ssh
-          echo $SSH_PUBLIC > ~/.ssh/id_rsa.pub
-          echo "${{secrets.SSH_PRIVATE}}" > ~/.ssh/id_rsa
-          echo $SSH_HOST > ~/.ssh/known_hosts
+#          echo $SSH_PUBLIC > ~/.ssh/id_rsa.pub
+          echo "${{secrets.REIMBURSEMENT_PRIVATE_KEY}}" > ~/.ssh/id_rsa
+#          echo $SSH_HOST > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_rsa
       - name: Create config.yml file
         run: |
@@ -76,15 +77,15 @@ jobs:
           echo "LOG:" >> config.yml
           echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yml
       - name: Remove previous binary and config.yml file from remote instance
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "rm -rf config.yml;rm -rf reimbursement_backend;"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "rm -rf config.yml;rm -rf reimbursement_backend;"
       - name: Kill the process
         continue-on-error: true
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "kill \$(lsof -t -i:9000)"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "kill \$(lsof -t -i:80)"
       - name: Move Binary to Remote Instance
-        run: scp -o StrictHostKeyChecking=no reimbursement_backend sanjay@34.93.91.239:/home/sanjay/reimbursement_backend
+        run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@34.131.14.74:/home/reimbursement/reimbursement_backend
       - name: Move config.yml File to Remote
-        run: scp -o StrictHostKeyChecking=no config.yml sanjay@34.93.91.239:/home/sanjay/config.yml
+        run: scp -o StrictHostKeyChecking=no config.yml reimbursement@34.131.14.74:/home/reimbursement/config.yml
       - name: Change file access mode
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "chmod +x reimbursement_backend;chmod +x config.yml;"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "chmod +x reimbursement_backend;chmod +x config.yml;"
       - name: Run the binary
-        run: ssh -o StrictHostKeyChecking=no sanjay@34.93.91.239 "./reimbursement_backend &"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.14.74 "./reimbursement_backend &"
