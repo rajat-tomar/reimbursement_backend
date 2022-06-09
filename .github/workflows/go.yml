@@ -92,5 +92,5 @@ jobs:
 
       - name: Run the binary
         run: |
-        ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo ./reimbursement_backend &"
-        exit
+          ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo ./reimbursement_backend &"
+          exit
