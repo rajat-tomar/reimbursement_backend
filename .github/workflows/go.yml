@@ -75,20 +75,20 @@ jobs:
           echo "SERVER:" >> config.yml
           echo "  PORT: ${{secrets.SERVER_PORT}}" >> config.yml
       - name: Remove previous binary and config.yml file from remote instance
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "rm -rf config.yml;rm -rf reimbursement_backend;"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@BACKEND_INSTANCE_IP "rm -rf config.yml;rm -rf reimbursement_backend;"
 
       - name: Kill the process
         continue-on-error: true
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@BACKEND_INSTANCE_IP "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
 
       - name: Move Binary to Remote Instance
-        run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@34.131.29.41:/home/reimbursement/reimbursement_backend
+        run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@BACKEND_INSTANCE_IP:/home/reimbursement/reimbursement_backend
 
       - name: Move config.yml File to Remote
-        run: scp -o StrictHostKeyChecking=no config.yml reimbursement@34.131.29.41:/home/reimbursement/config.yml
+        run: scp -o StrictHostKeyChecking=no config.yml reimbursement@BACKEND_INSTANCE_IP:/home/reimbursement/config.yml
 
       - name: Change file access mode
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "chmod +x reimbursement_backend;chmod +x config.yml;"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@BACKEND_INSTANCE_IP "chmod +x reimbursement_backend;chmod +x config.yml;"
 
       - name: Restart the service to run the updated binary
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo systemctl restart reimbursement.service"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@BACKEND_INSTANCE_IP "sudo systemctl restart reimbursement.service"
