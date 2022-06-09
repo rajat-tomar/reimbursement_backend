@@ -91,7 +91,6 @@ jobs:
         run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "chmod +x reimbursement_backend;chmod +x config.yml;"
 
       - name: Run the binary
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo ./reimbursement_backend &"
-
-      - name: Make Action exit from the instance after running binary in background
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "exit"
+        run: |
+        ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo ./reimbursement_backend &"
+        exit
