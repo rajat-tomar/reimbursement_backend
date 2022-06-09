@@ -79,7 +79,7 @@ jobs:
 
       - name: Kill the process
         continue-on-error: true
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "kill \$(lsof -t -i:80)"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo kill \$(lsof -t -i:80)"
 
       - name: Move Binary to Remote Instance
         run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@34.131.29.41:/home/reimbursement/reimbursement_backend
