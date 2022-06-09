@@ -4,7 +4,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var configuration *Configuration
+type Configuration struct {
+	Database Database
+	Log      Log
+	Server   Server
+}
 
 type Database struct {
 	User     string
@@ -18,10 +22,11 @@ type Log struct {
 	Level string
 }
 
-type Configuration struct {
-	Database Database
-	Log      Log
+type Server struct {
+	Port int
 }
+
+var configuration *Configuration
 
 func InitConfig() {
 	configuration = new(Configuration)
