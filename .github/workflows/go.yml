@@ -79,7 +79,7 @@ jobs:
 
       - name: Kill the process
         continue-on-error: true
-        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo kill \$(lsof -t -i:80)"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
 
       - name: Move Binary to Remote Instance
         run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@34.131.29.41:/home/reimbursement/reimbursement_backend
@@ -90,7 +90,5 @@ jobs:
       - name: Change file access mode
         run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "chmod +x reimbursement_backend;chmod +x config.yml;"
 
-      - name: Run the binary
-        run: |
-          ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo ./reimbursement_backend &"
-          exit
+      - name: Restart the service to run the updated binary
+        run: ssh -o StrictHostKeyChecking=no reimbursement@34.131.29.41 "sudo systemctl restart reimbursement.service"
