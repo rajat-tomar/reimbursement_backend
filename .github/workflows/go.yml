@@ -91,5 +91,5 @@ jobs:
       - name: Change file access mode
         run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yml;"
 
-      - name: Restart the service to run the updated binary
-        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl restart reimbursement.service"
+      - name: Start the service to run the updated binary
+        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl start reimbursement.service"
