@@ -7,23 +7,21 @@ import (
 	"strings"
 )
 
-var SugarLogger *zap.SugaredLogger
+var Logger *zap.SugaredLogger
 
 func InitLogger() {
-	config := zap.NewDevelopmentEncoderConfig()
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
-	fileEncoder := zapcore.NewJSONEncoder(config)
-	writer := zapcore.AddSync(os.Stdout)
-	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, writer, zapcore.DebugLevel),
-	)
-	Logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-	defer Logger.Sync()
-	SugarLogger = Logger.Sugar()
+	encoder := getEncoder()
+	core := zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), getLogLevel())
+	logger := zap.New(core)
+	Logger = logger.Sugar()
+}
+
+func getEncoder() zapcore.Encoder {
+	return zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 }
 
 func getLogLevel() zapcore.Level {
-	switch strings.ToLower(configuration.Log.Level) {
+	switch strings.ToLower(Configuration.Logging.Level) {
 	case "debug":
 		return zapcore.DebugLevel
 	case "info":

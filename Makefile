@@ -3,6 +3,6 @@ docker-postgres:
 create-database:
 	psql -h localhost -U postgres password=postgres -c 'CREATE DATABASE reimbursement;'
 migrate-up:
-	migrate -path database/migration -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose up
+	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose up
 migrate-down:
-	migrate -path database/migration -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose down
+	migrate -path db/migrations -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose down

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 	"reimbursement_backend/config"
 	"reimbursement_backend/util"
@@ -12,27 +11,26 @@ import (
 func httpServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "This Is Our Golang Hello World Server")
+		fmt.Fprintf(w, "This Is Our Golang Hello World ServerConfiguration")
 	})
 
-	configuration := config.GetConfig()
 	var port interface{}
-	port = configuration.Server.Port
-	if port == 0 {
-		port = 80
+	port = config.Configuration.Server.HTTPPort
+	if port == "" {
+		port = "8080"
 	}
 
-	address := fmt.Sprintf("0.0.0.0:%d", port)
+	address := fmt.Sprintf("0.0.0.0:%s", port)
 
 	if err := http.ListenAndServe(address, r); err != nil {
-		log.Fatal(err)
+		config.Logger.Error(err)
 	}
 }
 
 func main() {
-	config.InitConfig()
 	config.InitConfiguration()
 	config.InitLogger()
+	config.InitDb()
 	util.ExecuteCommands()
 	httpServer()
 }

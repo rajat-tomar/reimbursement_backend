@@ -62,21 +62,24 @@ jobs:
           mkdir ~/.ssh
           echo "${{secrets.REIMBURSEMENT_PRIVATE_KEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-      - name: Create config.yml file
+      - name: Create config.yaml file
         run: |
-          touch config.yml
-          echo "DATABASE:" >> config.yml
-          echo "  USER: ${{secrets.DB_USER}}" >> config.yml
-          echo "  DB_NAME: ${{secrets.DB_NAME}}" >> config.yml
-          echo "  HOST: ${{secrets.DB_HOST}}" >> config.yml
-          echo "  PASSWORD: ${{secrets.DB_PASSWORD}}" >> config.yml
-          echo "  PORT: ${{secrets.DB_PORT}}" >> config.yml
-          echo "LOG:" >> config.yml
-          echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yml
-          echo "SERVER:" >> config.yml
-          echo "  PORT: ${{secrets.SERVER_PORT}}" >> config.yml
-      - name: Remove previous binary and config.yml file from remote instance
-        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yml;rm -rf reimbursement_backend;"
+          touch config.yaml
+          echo "DB:" >> config.yaml
+          echo "  USER: ${{secrets.DB_USER}}" >> config.yaml
+          echo "  NAME: ${{secrets.DB_NAME}}" >> config.yaml
+          echo "  HOST: ${{secrets.DB_HOST}}" >> config.yaml
+          echo "  PASSWORD: ${{secrets.DB_PASSWORD}}" >> config.yaml
+          echo "  PORT: ${{secrets.DB_PORT}}" >> config.yaml
+          echo "  SSL_MODE: ${{secrets.SSL_MODE}}" >> config.yaml
+          echo "LOG:" >> config.yaml
+          echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yaml
+          echo "SERVER:" >> config.yaml
+          echo "  HTTP_PORT: ${{secrets.SERVER_PORT}}" >> config.yaml
+          echo "MIGRATIONS:" >> config.yaml
+          echo "  FILE_PATH: "db/migrations" >> config.yaml
+      - name: Remove previous binary and config.yaml file from remote instance
+        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;"
 
       - name: Kill the process
         continue-on-error: true
@@ -85,11 +88,11 @@ jobs:
       - name: Move Binary to Remote Instance
         run: scp -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
 
-      - name: Move config.yml File to Remote
-        run: scp -o StrictHostKeyChecking=no config.yml reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/config.yml
+      - name: Move config.yaml File to Remote
+        run: scp -o StrictHostKeyChecking=no config.yaml reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/config.yaml
 
       - name: Change file access mode
-        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yml;"
+        run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
 
       - name: Start the service to run the updated binary
         run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl start reimbursement.service"

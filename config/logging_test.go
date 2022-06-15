@@ -7,14 +7,12 @@ import (
 )
 
 func TestInitLogger(t *testing.T) {
-	assert.Nil(t, SugarLogger)
+	assert.Nil(t, Logger)
 	InitLogger()
-	assert.NotNil(t, SugarLogger)
+	assert.NotNil(t, Logger)
 }
 
 func TestGetLogLevel(t *testing.T) {
-	InitConfig()
-	initConfigurationFromENV()
 	expectedLevel := zapcore.DebugLevel
 	actualLevel := getLogLevel()
 	assert.Equal(t, expectedLevel, actualLevel)
