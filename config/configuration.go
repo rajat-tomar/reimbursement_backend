@@ -10,7 +10,7 @@ type Configurations struct {
 	Db         *DatabaseConfiguration `mapstructure:"DB"`
 	Logging    *LoggingConfiguration  `mapstructure:"LOG"`
 	Server     *ServerConfiguration   `mapstructure:"SERVER"`
-	Migrations *Migrations            `mapstructure:"MIGRATIONS"`
+	Migrations *Migration             `mapstructure:"MIGRATIONS"`
 }
 
 type DatabaseConfiguration struct {
@@ -30,7 +30,7 @@ type ServerConfiguration struct {
 	HTTPPort string `mapstructure:"HTTP_PORT"`
 }
 
-type Migrations struct {
+type Migration struct {
 	FilePath string `mapstructure:"FILE_PATH"`
 }
 

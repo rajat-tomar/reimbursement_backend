@@ -42,7 +42,7 @@ var createMigrationCommand = &cobra.Command{
 	Long:  "It will create migration from CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := createMigrations(); err != nil {
-			config.Logger.Fatalw("Migrations creation failed", "error", err)
+			config.Logger.Fatalw("Migration creation failed", "error", err)
 		}
 	},
 }
@@ -53,7 +53,7 @@ var rollbackLatestMigrationCommand = &cobra.Command{
 	Long:  "It will rollback latest migration from CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := db.RollbackLatestMigration(); err != nil {
-			config.Logger.Fatalw("Migrations rollback failed", "error", err)
+			config.Logger.Fatalw("Migration rollback failed", "error", err)
 		}
 	},
 }

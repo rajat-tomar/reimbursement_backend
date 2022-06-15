@@ -17,7 +17,7 @@ func httpServer() {
 	var port interface{}
 	port = config.Configuration.Server.HTTPPort
 	if port == "" {
-		port = "8080"
+		port = "80"
 	}
 
 	address := fmt.Sprintf("0.0.0.0:%s", port)

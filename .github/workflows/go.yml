@@ -76,8 +76,8 @@ jobs:
           echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yaml
           echo "SERVER:" >> config.yaml
           echo "  HTTP_PORT: ${{secrets.SERVER_PORT}}" >> config.yaml
-          echo "MIGRATIONS:" >> config.yaml
-          echo "  FILE_PATH: "db/migrations" >> config.yaml
+          echo "MIGRATION:" >> config.yaml
+          echo "  FILE_PATH: \"db/migration\"" >> config.yaml
       - name: Remove previous binary and config.yaml file from remote instance
         run: ssh -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;"
 
