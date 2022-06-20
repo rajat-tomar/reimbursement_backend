@@ -6,3 +6,5 @@ migrate-up:
 	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose up
 migrate-down:
 	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/reimbursement?sslmode=disable" -verbose down
+create-test-database:
+	psql -h localhost -U postgres password=postgres -c 'CREATE DATABASE reimbursement_test;'
