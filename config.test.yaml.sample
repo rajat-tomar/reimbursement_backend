@@ -1,0 +1,13 @@
+DB:
+  USER: postgres
+  NAME: reimbursement_test
+  HOST: localhost
+  PASSWORD: password
+  PORT: 5432
+  SSL_MODE: disable
+LOG:
+  LEVEL: debug
+SERVER:
+  HTTP_PORT: 80
+MIGRATION:
+  FILE_PATH: "db/migration"
