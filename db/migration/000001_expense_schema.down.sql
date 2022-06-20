@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS EXPENSES;
+drop table if exists expenses;

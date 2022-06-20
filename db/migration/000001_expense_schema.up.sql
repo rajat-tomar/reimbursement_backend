@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS EXPENSES (
-    ID INT PRIMARY KEY,
-    AMOUNT FLOAT,
-    CREATED_AT TIMESTAMP,
-    UPDATED_AT TIMESTAMP
+create table if not exists expenses
+(
+    id         bigserial primary key,
+    amount     bigint      not null,
+    created_at timestamptz not null default now()
 );
