@@ -47,3 +47,17 @@ func InitConfiguration() {
 		Logger.Error(err)
 	}
 }
+
+func InitTestConfiguration() {
+	viper.SetConfigName("config.test")
+	viper.AddConfigPath("../")
+	viper.AutomaticEnv()
+	viper.SetConfigType("yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		panic("Error reading config file" + err.Error())
+	}
+	err := viper.Unmarshal(&Configuration)
+	if err != nil {
+		Logger.Error(err)
+	}
+}
