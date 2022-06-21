@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"reimbursement_backend/config"
 	"reimbursement_backend/model"
@@ -18,7 +17,6 @@ func TestRepositoryExpense_GetById(t *testing.T) {
 		&expense.Id,
 		&expense.Amount,
 	)
-	fmt.Println(expense.Id, expense.Amount)
 	if err != nil {
 		config.Logger.Panicw("cannot connect to the database", "error", err)
 		panic(err)
