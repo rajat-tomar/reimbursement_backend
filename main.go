@@ -31,6 +31,7 @@ func main() {
 	config.InitConfiguration()
 	config.InitLogger()
 	config.InitDb()
+	defer config.CloseDb()
 	util.ExecuteCommands()
 	httpServer()
 }
