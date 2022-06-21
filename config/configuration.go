@@ -28,7 +28,7 @@ type LoggingConfiguration struct {
 }
 
 type ServerConfiguration struct {
-	HTTPPort string `mapstructure:"HTTP_PORT"`
+	HTTPPort int `mapstructure:"HTTP_PORT"`
 }
 
 type Migration struct {
