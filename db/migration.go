@@ -12,13 +12,12 @@ import (
 )
 
 func RunDbMigrationUp() error {
-	database := "postgres"
-	db, err := sql.Open(database, getDatabaseURL())
+	db, err := sql.Open("postgres", getDatabaseURL())
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		config.Logger.Error(err)
 	}
-	mig, err := migrate.NewWithDatabaseInstance("file://"+config.Configuration.Migrations.FilePath, "postgres", driver)
+	mig, err := migrate.NewWithDatabaseInstance("file://"+config.Configuration.Migration.FilePath, "postgres", driver)
 	if err != nil {
 		config.Logger.Error(err)
 	}
@@ -30,7 +29,7 @@ func RunDbMigrationUp() error {
 }
 
 func RollbackLatestMigration() error {
-	mig, err := migrate.New("file://"+config.Configuration.Migrations.FilePath, getDatabaseURL())
+	mig, err := migrate.New("file://"+config.Configuration.Migration.FilePath, getDatabaseURL())
 	if err != nil {
 		config.Logger.Error(err)
 	}
@@ -42,13 +41,12 @@ func RollbackLatestMigration() error {
 }
 
 func RunDbMigrationDown() error {
-	database := "postgres"
-	db, err := sql.Open(database, getDatabaseURL())
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	dbConn, err := sql.Open("postgres", getDatabaseURL())
+	driver, err := postgres.WithInstance(dbConn, &postgres.Config{})
 	if err != nil {
 		config.Logger.Error(err)
 	}
-	mig, err := migrate.NewWithDatabaseInstance("file://"+config.Configuration.Migrations.FilePath, "postgres", driver)
+	mig, err := migrate.NewWithDatabaseInstance("file://"+config.Configuration.Migration.FilePath, "postgres", driver)
 	if err != nil {
 		config.Logger.Error(err)
 	}
@@ -61,8 +59,8 @@ func RunDbMigrationDown() error {
 
 func CreateMigration(filename string) error {
 	timeStamp := time.Now().Unix()
-	upMigrationFilePath := fmt.Sprintf("%s/%d_%s.up.sql", config.Configuration.Migrations.FilePath, timeStamp, filename)
-	downMigrationFilePath := fmt.Sprintf("%s/%d_%s.down.sql", config.Configuration.Migrations.FilePath, timeStamp, filename)
+	upMigrationFilePath := fmt.Sprintf("%s/%d_%s.up.sql", config.Configuration.Migration.FilePath, timeStamp, filename)
+	downMigrationFilePath := fmt.Sprintf("%s/%d_%s.down.sql", config.Configuration.Migration.FilePath, timeStamp, filename)
 
 	if err := createFile(upMigrationFilePath); err != nil {
 		config.Logger.Error(err)
