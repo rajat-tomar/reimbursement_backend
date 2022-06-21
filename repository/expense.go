@@ -1,37 +1,37 @@
 package repository
 
 import (
-	"gorm.io/gorm"
+	"database/sql"
 	"reimbursement_backend/model"
 )
 
 type ExpenseRepository interface {
-	Create(expense model.Expense) (int, error)
-	GetById(expenseID int) (float64, error)
+	Create(expense model.Expense) (model.Expense, error)
+	GetById(expenseID int) (model.Expense, error)
 	GetAll() ([]model.Expense, error)
 }
 
 type expenseRepository struct {
-	db *gorm.DB
+	db *sql.DB
 }
 
-func (er *expenseRepository) Create(expense model.Expense) (int, error) {
-	tx := er.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+func (er *expenseRepository) Create(e model.Expense) (model.Expense, error) {
+	sqlStatement := `INSERT INTO expenses(Amount) VALUES($1)`
+	row := er.db.QueryRow(sqlStatement, e.Amount)
+	var expense model.Expense
+	err := row.Scan(
+		&expense.Amount,
+	)
+	return expense, err
+}
 
-	tx = tx.Create(&expense)
-	if tx.Error != nil {
-		tx.Rollback()
-		return 0, tx.Error
-	}
-
-	err := tx.Commit().Error
-	if err != nil {
-		return 0, err
-	}
-	return expense.ID, nil
+func (er *expenseRepository) GetById(expenseID int) (model.Expense, error) {
+	sqlStatement := `SELECT id, amount FROM expenses WHERE Id = $1`
+	row := er.db.QueryRow(sqlStatement, expenseID)
+	var expense model.Expense
+	err := row.Scan(
+		&expense.Id,
+		&expense.Amount,
+	)
+	return expense, err
 }
