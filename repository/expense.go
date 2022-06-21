@@ -16,22 +16,15 @@ type expenseRepository struct {
 }
 
 func (er *expenseRepository) Create(e model.Expense) (model.Expense, error) {
-	sqlStatement := `INSERT INTO expenses(Amount) VALUES($1)`
-	row := er.db.QueryRow(sqlStatement, e.Amount)
+	sqlStatement := `INSERT INTO expenses(amount) VALUES($1) RETURNING Id, Amount`
 	var expense model.Expense
-	err := row.Scan(
-		&expense.Amount,
-	)
+	err := er.db.QueryRow(sqlStatement, e.Amount).Scan(&expense.Id, &expense.Amount)
 	return expense, err
 }
 
 func (er *expenseRepository) GetById(expenseID int) (model.Expense, error) {
 	sqlStatement := `SELECT id, amount FROM expenses WHERE Id = $1`
-	row := er.db.QueryRow(sqlStatement, expenseID)
 	var expense model.Expense
-	err := row.Scan(
-		&expense.Id,
-		&expense.Amount,
-	)
+	err := er.db.QueryRow(sqlStatement, expenseID).Scan(&expense.Id, &expense.Amount)
 	return expense, err
 }
