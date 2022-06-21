@@ -1,6 +1,6 @@
 create table if not exists expenses
 (
-    id         bigserial primary key,
-    amount     bigint      not null,
-    created_at timestamptz not null default now()
+    Id         serial primary key,
+    Amount     int         not null,
+    Created_at timestamptz not null default now()
 );

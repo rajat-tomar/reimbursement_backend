@@ -5,7 +5,7 @@ import (
 )
 
 type Expense struct {
-	Id        int64     `json:"id"`
-	Amount    int64     `json:"amount"`
+	Id        int       `json:"id"`
+	Amount    int       `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
 }
