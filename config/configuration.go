@@ -7,10 +7,11 @@ import (
 var Configuration *Configurations
 
 type Configurations struct {
-	Db         *DatabaseConfiguration `mapstructure:"DB"`
-	Logging    *LoggingConfiguration  `mapstructure:"LOG"`
-	Server     *ServerConfiguration   `mapstructure:"SERVER"`
-	Migrations *Migration             `mapstructure:"MIGRATIONS"`
+	Environment string
+	Db          *DatabaseConfiguration `mapstructure:"DB"`
+	Logging     *LoggingConfiguration  `mapstructure:"LOG"`
+	Server      *ServerConfiguration   `mapstructure:"SERVER"`
+	Migration   *Migration             `mapstructure:"MIGRATIONS"`
 }
 
 type DatabaseConfiguration struct {
@@ -37,20 +38,6 @@ type Migration struct {
 func InitConfiguration() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
-	viper.SetConfigType("yaml")
-	if err := viper.ReadInConfig(); err != nil {
-		panic("Error reading config file" + err.Error())
-	}
-	err := viper.Unmarshal(&Configuration)
-	if err != nil {
-		Logger.Error(err)
-	}
-}
-
-func InitTestConfiguration() {
-	viper.SetConfigName("config.test")
-	viper.AddConfigPath("../")
 	viper.AutomaticEnv()
 	viper.SetConfigType("yaml")
 	if err := viper.ReadInConfig(); err != nil {
