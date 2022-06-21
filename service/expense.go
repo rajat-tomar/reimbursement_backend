@@ -16,8 +16,8 @@ type expenseService struct {
 	expenseRepository repository.ExpenseRepository
 }
 
-func (es *expenseService) Create(ex model.Expense) (model.Expense, error) {
-	expense, err := es.expenseRepository.Create(ex)
+func (es *expenseService) Create(e model.Expense) (model.Expense, error) {
+	expense, err := es.expenseRepository.Create(e)
 	if err != nil {
 		return model.Expense{}, errors.New("error creating expense")
 	}
