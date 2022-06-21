@@ -11,7 +11,7 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: reimbursement
-          POSTGRES_PASSWORD: reimbursement
+          POSTGRES_PASSWORD: password
           POSTGRES_DB: reimbursement
         ports:
           - 5432:5432
