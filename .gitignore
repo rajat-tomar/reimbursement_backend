@@ -1,3 +1,6 @@
 .idea/
 config.yaml
 reimbursement_backend
+config/configuration_test.go
+config/db_test.go
+config/logging_test.go
