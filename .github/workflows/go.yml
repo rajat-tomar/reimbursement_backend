@@ -57,7 +57,6 @@ jobs:
       - name: Add SSH Key To Runner
         env:
           REIMBURSEMENT_PRIVATE_KEY: ${{secrets.REIMBURSEMENT_PRIVATE_KEY}}
-          BACKEND_INSTANCE_KEY: ${{secrets.BACKEND_INSTANCE_KEY}}
         run: |
           mkdir ~/.ssh
           echo "${{secrets.REIMBURSEMENT_PRIVATE_KEY}}" > ~/.ssh/id_rsa
