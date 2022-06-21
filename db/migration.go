@@ -12,8 +12,8 @@ import (
 )
 
 func RunDbMigrationUp() error {
-	db, err := sql.Open("postgres", getDatabaseURL())
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	dbConn, err := sql.Open("postgres", getDatabaseURL())
+	driver, err := postgres.WithInstance(dbConn, &postgres.Config{})
 	if err != nil {
 		config.Logger.Error(err)
 	}

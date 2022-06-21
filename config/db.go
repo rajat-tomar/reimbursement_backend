@@ -21,7 +21,6 @@ func InitDb() {
 	if err = db.Ping(); err != nil {
 		Logger.Panicw("cannot connect to the database", "error", err)
 	}
-	Logger.Infow("successfully connected to the database")
 }
 
 func CloseDb() {
