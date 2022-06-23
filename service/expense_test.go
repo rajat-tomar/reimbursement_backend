@@ -10,7 +10,7 @@ import (
 type mockExpenseRepository struct {
 }
 
-func (m mockExpenseRepository) GetById(expenseID int) (model.Expense, error) {
+func (m mockExpenseRepository) GetExpenseById(expenseID int) (model.Expense, error) {
 	//TODO implement me
 	panic("implement me")
 }

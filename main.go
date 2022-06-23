@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"reimbursement_backend/api"
 	"reimbursement_backend/config"
 	"reimbursement_backend/util"
 )
@@ -13,6 +14,10 @@ func runServer() {
 	r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "This Is Our Golang Hello World Server Configuration")
 	})
+	controllers := api.NewControllers()
+
+	r.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
+	r.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
 	port := config.Configuration.Server.HTTPPort
 	if port == 0 {
 		port = 80

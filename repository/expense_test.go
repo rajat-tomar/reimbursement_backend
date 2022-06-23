@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-func TestRepositoryExpense_GetById(t *testing.T) {
+func TestRepositoryExpense_GetExpenseById(t *testing.T) {
 	sqlStatement := `INSERT INTO expenses(Id, Amount) VALUES($1, $2)`
 	_ = testDb.QueryRow(sqlStatement, 9, 100)
 
 	var expense model.Expense
 	err := testDb.QueryRow(`select id, amount from expenses where id = 9`).Scan(&expense.Id, &expense.Amount)
 	expenseRepository := expenseRepository{db: testDb}
-	expenseGot, err := expenseRepository.GetById(9)
+	expenseGot, err := expenseRepository.GetExpenseById(9)
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, expenseGot)
 	assert.Equal(t, expenseGot.Id, 9)
@@ -28,6 +28,6 @@ func TestRepositoryExpense_Create(t *testing.T) {
 	expenseActual, err := expenseRepository.Create(expenseExpected)
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, expenseActual)
-	expenseGot, _ := expenseRepository.GetById(expenseActual.Id)
+	expenseGot, _ := expenseRepository.GetExpenseById(expenseActual.Id)
 	assert.Equal(t, 1000, expenseGot.Amount)
 }
