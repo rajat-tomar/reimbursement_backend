@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"reimbursement_backend/model"
 	"reimbursement_backend/repository"
 )
@@ -22,7 +22,7 @@ func (es *expenseService) GetExpenseById(expenseId int) (model.Expense, error) {
 func (es *expenseService) Create(e model.Expense) (model.Expense, error) {
 	expense, err := es.expenseRepository.Create(e)
 	if err != nil {
-		return model.Expense{}, errors.New("error creating expense")
+		return model.Expense{}, fmt.Errorf("create error: %w", err)
 	}
 	return expense, nil
 }
