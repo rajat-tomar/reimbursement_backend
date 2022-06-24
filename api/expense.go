@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
@@ -19,19 +18,8 @@ type expenseController struct {
 }
 
 func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
-	var reqExpense model.Expense
-	json.NewDecoder(r.Body).Decode(&reqExpense)
-	resExpense, err := e.expenseService.Create(reqExpense)
-	var response string
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		response = fmt.Sprintf("Expense amount %d is created successfully with %d", resExpense.Amount, resExpense.Id)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		response = err.Error()
-	}
+	expense := model.Expense{Id: 7, Amount: 1000}
+	response := model.Response{Data: expense}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -40,7 +28,7 @@ func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Reques
 	id = r.URL.Query().Get("id")
 	expenseId, _ := strconv.Atoi(id)
 
-	result, err := e.expenseService.GetExpenseById(expenseId)
+	expense, err := e.expenseService.GetExpenseById(expenseId)
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
@@ -48,7 +36,7 @@ func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(expense)
 }
 
 func NewExpenseController() *expenseController {

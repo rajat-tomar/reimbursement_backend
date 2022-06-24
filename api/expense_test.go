@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reimbursement_backend/model"
@@ -89,5 +91,28 @@ func TestGetExpenseById(t *testing.T) {
 		got := rr.Code
 
 		assert.Equal(t, want, got)
+	})
+}
+
+func TestCreateExpense(t *testing.T) {
+	t.Run("given expense amount 1000 when valid returns the id of the created expense", func(t *testing.T) {
+		reqBody, _ := json.Marshal(map[string]int{
+			"amount": 1000,
+		})
+
+		req, _ := http.NewRequest(http.MethodPost, "/expense", bytes.NewBuffer(reqBody))
+		rr := httptest.NewRecorder()
+		expenseController := expenseController{
+			expenseService: &mockExpenseService{},
+		}
+		handler := http.HandlerFunc(expenseController.CreateExpense)
+		handler.ServeHTTP(rr, req)
+
+		body, _ := ioutil.ReadAll(rr.Body)
+		response := model.Response{Data: model.Expense{Id: 7, Amount: 1000}}
+		marshalledResponse, _ := json.Marshal(response)
+		got := string(body)
+		want := string(marshalledResponse)
+		assert.JSONEq(t, want, got)
 	})
 }
