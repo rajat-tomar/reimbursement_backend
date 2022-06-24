@@ -39,15 +39,15 @@ func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Reques
 	var id string
 	id = r.URL.Query().Get("id")
 	expenseId, _ := strconv.Atoi(id)
+
 	result, err := e.expenseService.GetExpenseById(expenseId)
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		result = model.Expense{}
+	w.Header().Set("Content-Type", "application/json")
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
+
 	json.NewEncoder(w).Encode(result)
 }
 
