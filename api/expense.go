@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
@@ -18,8 +20,27 @@ type expenseController struct {
 }
 
 func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
-	expense := model.Expense{Id: 7, Amount: 1000}
-	response := model.Response{Data: expense}
+	var expense model.Expense
+	var response model.Response
+	body, _ := ioutil.ReadAll(r.Body)
+	_ = json.Unmarshal(body, &expense)
+
+	if expense.Amount == 0 {
+		response = model.Response{
+			Errors: []error{fmt.Errorf("amount must be greater than 0")},
+		}
+	} else {
+		expense, err := e.expenseService.CreateExpense(expense)
+		if err != nil {
+			response = model.Response{
+				Errors: []error{fmt.Errorf("error creating expense")},
+			}
+		} else {
+			response = model.Response{
+				Data: expense,
+			}
+		}
+	}
 	json.NewEncoder(w).Encode(response)
 }
 

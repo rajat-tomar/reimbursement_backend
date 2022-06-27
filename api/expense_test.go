@@ -14,9 +14,11 @@ import (
 
 type mockExpenseService struct{}
 
-func (e *mockExpenseService) Create(expense model.Expense) (model.Expense, error) {
-	//TODO implement me
-	panic("implement me")
+func (e *mockExpenseService) CreateExpense(expense model.Expense) (model.Expense, error) {
+	if expense.Amount == 900 {
+		return model.Expense{}, fmt.Errorf("error creating expense")
+	}
+	return model.Expense{Id: 7, Amount: 1000}, nil
 }
 
 func (e *mockExpenseService) GetExpenseById(expenseId int) (model.Expense, error) {
@@ -102,9 +104,7 @@ func TestCreateExpense(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodPost, "/expense", bytes.NewBuffer(reqBody))
 		rr := httptest.NewRecorder()
-		expenseController := expenseController{
-			expenseService: &mockExpenseService{},
-		}
+		expenseController := expenseController{expenseService: &mockExpenseService{}}
 		handler := http.HandlerFunc(expenseController.CreateExpense)
 		handler.ServeHTTP(rr, req)
 
@@ -113,6 +113,46 @@ func TestCreateExpense(t *testing.T) {
 		marshalledResponse, _ := json.Marshal(response)
 		got := string(body)
 		want := string(marshalledResponse)
+		assert.JSONEq(t, want, got)
+	})
+
+	t.Run("given expense amount 0 when invalid returns error", func(t *testing.T) {
+		reqBody, _ := json.Marshal(map[string]int{
+			"amount": 0,
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/expense", bytes.NewBuffer(reqBody))
+		rr := httptest.NewRecorder()
+		expenseController := expenseController{expenseService: &mockExpenseService{}}
+		handler := http.HandlerFunc(expenseController.CreateExpense)
+		handler.ServeHTTP(rr, req)
+
+		body, _ := ioutil.ReadAll(rr.Body)
+		response := model.Response{Errors: []error{fmt.Errorf("amount must be greater than 0")}}
+		marshalledResponse, _ := json.Marshal(response)
+		got := string(body)
+		want := string(marshalledResponse)
+		assert.JSONEq(t, want, got)
+	})
+
+	t.Run("given expense amount 900 when expense service returns error returns error", func(t *testing.T) {
+		reqBody, _ := json.Marshal(map[string]int{
+			"amount": 900,
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/expense", bytes.NewBuffer(reqBody))
+		rr := httptest.NewRecorder()
+		expenseController := expenseController{expenseService: &mockExpenseService{}}
+		handler := http.HandlerFunc(expenseController.CreateExpense)
+		handler.ServeHTTP(rr, req)
+
+		body, _ := ioutil.ReadAll(rr.Body)
+		response := model.Response{Errors: []error{fmt.Errorf("error creating expense")}}
+		marshalledResponse, _ := json.Marshal(response)
+		got := string(body)
+		fmt.Println(got)
+		want := string(marshalledResponse)
+		fmt.Println(want)
 		assert.JSONEq(t, want, got)
 	})
 }
