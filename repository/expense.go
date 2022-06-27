@@ -8,7 +8,7 @@ import (
 )
 
 type ExpenseRepository interface {
-	Create(expense model.Expense) (model.Expense, error)
+	CreateExpense(expense model.Expense) (model.Expense, error)
 	GetExpenseById(expenseID int) (model.Expense, error)
 }
 
@@ -16,7 +16,7 @@ type expenseRepository struct {
 	db *sql.DB
 }
 
-func (er *expenseRepository) Create(e model.Expense) (model.Expense, error) {
+func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, error) {
 	sqlStatement := `INSERT INTO expenses(amount) VALUES($1) RETURNING Id, Amount`
 	var expense model.Expense
 	err := er.db.QueryRow(sqlStatement, e.Amount).Scan(&expense.Id, &expense.Amount)

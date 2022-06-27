@@ -7,7 +7,7 @@ import (
 )
 
 type ExpenseService interface {
-	Create(expense model.Expense) (model.Expense, error)
+	CreateExpense(expense model.Expense) (model.Expense, error)
 	GetExpenseById(expenseId int) (model.Expense, error)
 }
 
@@ -19,10 +19,10 @@ func (es *expenseService) GetExpenseById(expenseId int) (model.Expense, error) {
 	return es.expenseRepository.GetExpenseById(expenseId)
 }
 
-func (es *expenseService) Create(e model.Expense) (model.Expense, error) {
-	expense, err := es.expenseRepository.Create(e)
+func (es *expenseService) CreateExpense(e model.Expense) (model.Expense, error) {
+	expense, err := es.expenseRepository.CreateExpense(e)
 	if err != nil {
-		return model.Expense{}, fmt.Errorf("create error: %w", err)
+		return model.Expense{}, fmt.Errorf("error creating expense")
 	}
 	return expense, nil
 }

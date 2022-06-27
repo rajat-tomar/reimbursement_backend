@@ -20,7 +20,7 @@ func (m mockExpenseRepository) GetAll() ([]model.Expense, error) {
 	panic("implement me")
 }
 
-func (m mockExpenseRepository) Create(expense model.Expense) (model.Expense, error) {
+func (m mockExpenseRepository) CreateExpense(expense model.Expense) (model.Expense, error) {
 	if expense.Amount == -1 {
 		return model.Expense{}, errors.New("error creating expense")
 	}
@@ -35,7 +35,7 @@ func TestCreate_ReturnsErrorWhenUnableToCreate(t *testing.T) {
 	expenseService := expenseService{
 		expenseRepository: &mockExpenseRepository{},
 	}
-	_, err := expenseService.Create(expense)
+	_, err := expenseService.CreateExpense(expense)
 	assert.Equal(t, errors.New("error creating expense"), err)
 }
 
@@ -47,7 +47,7 @@ func TestCreate_ChecksForSuccessfulCreation(t *testing.T) {
 	expenseService := expenseService{
 		expenseRepository: &mockExpenseRepository{},
 	}
-	expenseActual, err := expenseService.Create(expenseExpected)
+	expenseActual, err := expenseService.CreateExpense(expenseExpected)
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, expenseActual)
 	assert.Equal(t, expenseExpected, expenseActual)

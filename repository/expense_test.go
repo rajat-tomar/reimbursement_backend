@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestRepositoryExpense_GetExpenseById(t *testing.T) {
+func TestGetExpenseById(t *testing.T) {
 	sqlStatement := `INSERT INTO expenses(Id, Amount) VALUES($1, $2)`
 	_ = testDb.QueryRow(sqlStatement, 9, 100)
 
@@ -20,12 +20,12 @@ func TestRepositoryExpense_GetExpenseById(t *testing.T) {
 	assert.Equal(t, expenseGot.Amount, 100)
 }
 
-func TestRepositoryExpense_Create(t *testing.T) {
+func TestCreateExpense(t *testing.T) {
 	expenseExpected := model.Expense{
 		Amount: 1000,
 	}
 	expenseRepository := expenseRepository{db: testDb}
-	expenseActual, err := expenseRepository.Create(expenseExpected)
+	expenseActual, err := expenseRepository.CreateExpense(expenseExpected)
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, expenseActual)
 	expenseGot, _ := expenseRepository.GetExpenseById(expenseActual.Id)
