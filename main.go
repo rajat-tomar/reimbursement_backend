@@ -10,17 +10,19 @@ import (
 )
 
 func runServer() {
+	const DefaultPort = 80
 	r := mux.NewRouter()
-	r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "This Is Our Golang Hello World Server Configuration")
-	})
 	controllers := api.NewControllers()
 
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Health check says ok!")
+	})
 	r.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	r.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
+
 	port := config.Configuration.Server.HTTPPort
 	if port == 0 {
-		port = 80
+		port = DefaultPort
 	}
 	address := fmt.Sprintf("0.0.0.0:%d", port)
 	if err := http.ListenAndServe(address, r); err != nil {
