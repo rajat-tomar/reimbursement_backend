@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"net/http"
 	"reimbursement_backend/api"
 	"reimbursement_backend/config"
@@ -11,23 +12,23 @@ import (
 
 func runServer() {
 	const DefaultPort = 80
-	r := mux.NewRouter()
-	controllers := api.NewControllers()
-
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Health check says ok!")
-	})
-	r.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
-	r.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
-
 	port := config.Configuration.Server.HTTPPort
 	if port == 0 {
 		port = DefaultPort
 	}
-	address := fmt.Sprintf("0.0.0.0:%d", port)
-	if err := http.ListenAndServe(address, r); err != nil {
-		config.Logger.Error(err)
-	}
+	address := fmt.Sprintf(":%d", port)
+	router := mux.NewRouter()
+	handler := cors.Default().Handler(router)
+	controllers := api.NewControllers()
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{\"hello\": \"world\"}"))
+	})
+	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
+	router.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
+
+	http.ListenAndServe(address, handler)
 }
 
 func main() {
