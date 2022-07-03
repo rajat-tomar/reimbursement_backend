@@ -9,7 +9,7 @@ import (
 
 type ExpenseRepository interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
-	GetExpenseById(expenseID int) (model.Expense, error
+	GetExpenseById(expenseID int) (model.Expense, error)
 }
 
 type expenseRepository struct {

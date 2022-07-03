@@ -32,11 +32,9 @@ func TestCreate_ReturnsErrorWhenUnableToCreate(t *testing.T) {
 		Id:     0,
 		Amount: -1,
 	}
-	expenseService := expenseService{
-		expenseRepository: &mockExpenseRepository{},
-	}
+	expenseService := expenseService{expenseRepository: &mockExpenseRepository{}}
 	_, err := expenseService.CreateExpense(expense)
-	assert.Equal(t, errors.New("error creating expense"), err)
+	assert.EqualError(t, err, "error from repo: error creating expense")
 }
 
 func TestCreate_ChecksForSuccessfulCreation(t *testing.T) {
@@ -44,9 +42,7 @@ func TestCreate_ChecksForSuccessfulCreation(t *testing.T) {
 		Id:     0,
 		Amount: 200,
 	}
-	expenseService := expenseService{
-		expenseRepository: &mockExpenseRepository{},
-	}
+	expenseService := expenseService{expenseRepository: &mockExpenseRepository{}}
 	expenseActual, err := expenseService.CreateExpense(expenseExpected)
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, expenseActual)
