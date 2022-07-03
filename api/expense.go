@@ -3,16 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
-	"strconv"
 )
 
 type ExpenseController interface {
 	CreateExpense(w http.ResponseWriter, r *http.Request)
-	GetExpenseById(w http.ResponseWriter, r *http.Request)
 }
 
 type expenseController struct {
@@ -22,42 +19,43 @@ type expenseController struct {
 func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	var expense model.Expense
 	var response model.Response
-	body, _ := ioutil.ReadAll(r.Body)
-	_ = json.Unmarshal(body, &expense)
-
-	if expense.Amount == 0 {
-		response = model.Response{
-			Errors: []error{fmt.Errorf("amount must be greater than 0")},
-		}
-	} else {
-		expense, err := e.expenseService.CreateExpense(expense)
-		if err != nil {
-			response = model.Response{
-				Errors: []error{fmt.Errorf("error creating expense")},
-			}
-		} else {
-			response = model.Response{
-				Data: expense,
-			}
-		}
-	}
-	json.NewEncoder(w).Encode(response)
-}
-
-func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Request) {
-	var id string
-	id = r.URL.Query().Get("id")
-	expenseId, _ := strconv.Atoi(id)
-
-	expense, err := e.expenseService.GetExpenseById(expenseId)
 	w.Header().Set("Content-Type", "application/json")
 
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		response = model.Response{Status: "error", Errors: []error{fmt.Errorf("Content-Type must be application/json")}}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&expense)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		response.Status = "error"
+		response.Errors = append(response.Errors, err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	if expense.Amount <= 0 {
+		response.Status = "error"
+		response.Errors = append(response.Errors, fmt.Errorf("amount must be greater than 0"))
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	expense, err = e.expenseService.CreateExpense(expense)
+	if err != nil {
+		response.Status = "error"
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Errors = append(response.Errors, err)
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	json.NewEncoder(w).Encode(expense)
+	response.Status = "success"
+	response.Data = expense
+	json.NewEncoder(w).Encode(response)
 }
 
 func NewExpenseController() *expenseController {

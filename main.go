@@ -26,7 +26,6 @@ func runServer() {
 		w.Write([]byte("{\"hello\": \"world\"}"))
 	})
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
-	router.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
 
 	http.ListenAndServe(address, handler)
 }
