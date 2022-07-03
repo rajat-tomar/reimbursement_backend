@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"reimbursement_backend/config"
 	"reimbursement_backend/model"
 )
@@ -20,14 +19,14 @@ func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, erro
 	sqlStatement := `INSERT INTO expenses(amount) VALUES($1) RETURNING Id, Amount`
 	var expense model.Expense
 	err := er.db.QueryRow(sqlStatement, e.Amount).Scan(&expense.Id, &expense.Amount)
-	return expense, fmt.Errorf("error from repo: %w", err)
+	return expense, err
 }
 
 func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error) {
 	sqlStatement := `SELECT id, amount FROM expenses WHERE Id = $1`
 	var expense model.Expense
 	err := er.db.QueryRow(sqlStatement, expenseID).Scan(&expense.Id, &expense.Amount)
-	return expense, fmt.Errorf("error from repo: %w", err)
+	return expense, err
 }
 
 func NewExpenseRepository() *expenseRepository {

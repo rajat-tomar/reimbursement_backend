@@ -23,7 +23,7 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 
 	if r.Header.Get("Content-Type") != "application/json" {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
-		response = model.Response{Status: "error", Errors: []error{fmt.Errorf("Content-Type must be application/json")}}
+		response = model.Response{Message: "Content-Type must be application/json"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -31,29 +31,25 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&expense)
 	if err != nil {
-		response.Status = "error"
-		response.Errors = append(response.Errors, err)
+		response.Message = fmt.Sprintf("error from json: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 	if expense.Amount <= 0 {
-		response.Status = "error"
-		response.Errors = append(response.Errors, fmt.Errorf("amount must be greater than 0"))
+		response.Message = "Amount must be greater than 0"
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 	expense, err = e.expenseService.CreateExpense(expense)
 	if err != nil {
-		response.Status = "error"
+		response.Message = fmt.Sprintf("error from service: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		response.Errors = append(response.Errors, err)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	response.Status = "success"
 	response.Data = expense
 	json.NewEncoder(w).Encode(response)
 }
