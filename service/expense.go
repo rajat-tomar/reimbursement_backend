@@ -8,6 +8,7 @@ import (
 
 type ExpenseService interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
+	GetExpenses() ([]model.Expense, error)
 }
 
 type expenseService struct {
@@ -20,6 +21,14 @@ func (es *expenseService) CreateExpense(e model.Expense) (model.Expense, error) 
 		return model.Expense{}, fmt.Errorf("error from repo: %w", err)
 	}
 	return expense, nil
+}
+
+func (es *expenseService) GetExpenses() ([]model.Expense, error) {
+	expenses, err := es.expenseRepository.GetExpenses()
+	if err != nil {
+		return nil, fmt.Errorf("error from repo: %w", err)
+	}
+	return expenses, nil
 }
 
 func NewExpenseService() *expenseService {

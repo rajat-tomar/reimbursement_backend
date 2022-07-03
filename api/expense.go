@@ -10,6 +10,7 @@ import (
 
 type ExpenseController interface {
 	CreateExpense(w http.ResponseWriter, r *http.Request)
+	GetExpenses(w http.ResponseWriter, r *http.Request)
 }
 
 type expenseController struct {
@@ -51,6 +52,22 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 	}
 
 	response.Data = expense
+	json.NewEncoder(w).Encode(response)
+}
+
+func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
+	var response model.Response
+	w.Header().Set("Content-Type", "application/json")
+
+	expenses, err := e.expenseService.GetExpenses()
+	if err != nil {
+		response.Message = fmt.Sprintf("error from service: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response.Data)
+		return
+	}
+
+	response.Data = expenses
 	json.NewEncoder(w).Encode(response)
 }
 
