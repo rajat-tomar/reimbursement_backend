@@ -9,7 +9,7 @@ import (
 
 type ExpenseRepository interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
-	GetExpenseById(expenseID int) (model.Expense, error)
+	GetExpenseById(expenseID int) (model.Expense, error
 }
 
 type expenseRepository struct {
@@ -20,15 +20,14 @@ func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, erro
 	sqlStatement := `INSERT INTO expenses(amount) VALUES($1) RETURNING Id, Amount`
 	var expense model.Expense
 	err := er.db.QueryRow(sqlStatement, e.Amount).Scan(&expense.Id, &expense.Amount)
-	return expense, err
+	return expense, fmt.Errorf("error from repo: %w", err)
 }
 
 func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error) {
 	sqlStatement := `SELECT id, amount FROM expenses WHERE Id = $1`
 	var expense model.Expense
 	err := er.db.QueryRow(sqlStatement, expenseID).Scan(&expense.Id, &expense.Amount)
-	fmt.Println("row", err, expense)
-	return expense, err
+	return expense, fmt.Errorf("error from repo: %w", err)
 }
 
 func NewExpenseRepository() *expenseRepository {
