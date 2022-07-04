@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"reimbursement_backend/config"
 	"reimbursement_backend/model"
 )
@@ -18,8 +19,13 @@ type expenseRepository struct {
 }
 
 func (er *expenseRepository) DeleteExpense(expenseID int) error {
+	var expense model.Expense
+	err := er.db.QueryRow(`SELECT id, amount FROM expenses WHERE id = $1`, expenseID).Scan(&expense.Id, &expense.Amount)
+	if err != nil {
+		return fmt.Errorf("no expense with given id")
+	}
 	sqlStatement := `DELETE FROM expenses WHERE Id = $1`
-	_, err := er.db.Exec(sqlStatement, expenseID)
+	_, err = er.db.Exec(sqlStatement, expenseID)
 	return err
 }
 

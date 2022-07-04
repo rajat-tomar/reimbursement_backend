@@ -35,7 +35,7 @@ func (es *expenseService) GetExpenses() ([]model.Expense, error) {
 func (es *expenseService) DeleteExpense(id int) error {
 	err := es.expenseRepository.DeleteExpense(id)
 	if err != nil {
-		return fmt.Errorf("error from repo: %w", err)
+		return err
 	}
 	return nil
 }
