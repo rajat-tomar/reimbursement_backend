@@ -9,6 +9,7 @@ import (
 type ExpenseService interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
 	GetExpenses() ([]model.Expense, error)
+	DeleteExpense(id int) error
 }
 
 type expenseService struct {
@@ -29,6 +30,14 @@ func (es *expenseService) GetExpenses() ([]model.Expense, error) {
 		return nil, fmt.Errorf("error from repo: %w", err)
 	}
 	return expenses, nil
+}
+
+func (es *expenseService) DeleteExpense(id int) error {
+	err := es.expenseRepository.DeleteExpense(id)
+	if err != nil {
+		return fmt.Errorf("error from repo: %w", err)
+	}
+	return nil
 }
 
 func NewExpenseService() *expenseService {

@@ -10,10 +10,17 @@ type ExpenseRepository interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
 	GetExpenseById(expenseID int) (model.Expense, error)
 	GetExpenses() ([]model.Expense, error)
+	DeleteExpense(expenseID int) error
 }
 
 type expenseRepository struct {
 	db *sql.DB
+}
+
+func (er *expenseRepository) DeleteExpense(expenseID int) error {
+	sqlStatement := `DELETE FROM expenses WHERE Id = $1`
+	_, err := er.db.Exec(sqlStatement, expenseID)
+	return err
 }
 
 func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, error) {

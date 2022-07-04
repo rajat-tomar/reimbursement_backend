@@ -27,6 +27,7 @@ func runServer() {
 	})
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	router.HandleFunc("/expenses", controllers.ExpenseController.GetExpenses).Methods("GET")
+	router.HandleFunc("/expense/{id}", controllers.ExpenseController.DeleteExpense).Methods("DELETE")
 
 	http.ListenAndServe(address, handler)
 }
