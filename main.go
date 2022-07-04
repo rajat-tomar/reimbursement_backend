@@ -18,7 +18,7 @@ func runServer() {
 	}
 	address := fmt.Sprintf(":%d", port)
 	router := mux.NewRouter()
-	handler := cors.Default().Handler(router)
+	handler := cors.AllowAll().Handler(router)
 	controllers := api.NewControllers()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
