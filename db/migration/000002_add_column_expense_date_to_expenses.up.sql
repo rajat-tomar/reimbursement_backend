@@ -1,1 +1,1 @@
-alter table expenses add column expense_date date not null;
+alter table expenses add column if not exists expense_date date not null;

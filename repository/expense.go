@@ -30,9 +30,9 @@ func (er *expenseRepository) DeleteExpense(expenseID int) error {
 }
 
 func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, error) {
-	sqlStatement := `INSERT INTO expenses(amount, expense_date) VALUES($1, $2) RETURNING id, amount, expense_date`
+	sqlStatement := `INSERT INTO expenses(amount, expense_date, category) VALUES($1, $2, $3) RETURNING id, amount, expense_date, category`
 	var expense model.Expense
-	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate).Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate)
+	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate, e.Category).Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
 	return expense, err
 }
 

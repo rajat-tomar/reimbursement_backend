@@ -48,6 +48,12 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	if requestBody.Category == "" {
+		response.Message = "Category can't be empty"
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 	expenseDate, err := time.Parse("2006-01-02", requestBody.ExpenseDate)
 	if err != nil {
 		response.Message = fmt.Sprintf("%v", err)
@@ -55,6 +61,7 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	expense.Category = requestBody.Category
 	expense.Amount = requestBody.Amount
 	expense.ExpenseDate = expenseDate
 	expense, err = e.expenseService.CreateExpense(expense)
