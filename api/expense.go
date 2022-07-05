@@ -7,6 +7,7 @@ import (
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
+	"time"
 )
 
 type ExpenseController interface {
@@ -22,32 +23,43 @@ type expenseController struct {
 func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	var expense model.Expense
 	var response model.Response
-	w.Header().Set("Content-Type", "application/json")
+	var requestBody ExpenseRequest
 
+	w.Header().Set("Content-Type", "application/json")
 	if r.Header.Get("Content-Type") != "application/json" {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
 		response = model.Response{Message: "Content-Type must be application/json"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&expense)
+	err := decoder.Decode(&requestBody)
 	if err != nil {
 		response.Message = fmt.Sprintf("error from json: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	if expense.Amount <= 0 {
+	if requestBody.Amount <= 0 {
 		response.Message = "Amount must be greater than 0"
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	expenseDate, err := time.Parse("2006-01-02", requestBody.ExpenseDate)
+	if err != nil {
+		response.Message = fmt.Sprintf("%v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	expense.Amount = requestBody.Amount
+	expense.ExpenseDate = expenseDate
 	expense, err = e.expenseService.CreateExpense(expense)
 	if err != nil {
-		response.Message = fmt.Sprintf("error from service: %v", err)
+		response.Message = fmt.Sprintf("%v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -63,7 +75,7 @@ func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) 
 
 	expenses, err := e.expenseService.GetExpenses()
 	if err != nil {
-		response.Message = fmt.Sprintf("error from service: %v", err)
+		response.Message = fmt.Sprintf("%v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response.Data)
 		return
