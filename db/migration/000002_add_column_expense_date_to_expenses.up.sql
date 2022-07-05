@@ -1,0 +1,1 @@
+alter table expenses add column expense_date date not null;
