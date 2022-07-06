@@ -78,17 +78,57 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 
 func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
 	var response model.Response
+	var expenses []model.Expense
 	w.Header().Set("Content-Type", "application/json")
+	startDate := r.URL.Query().Get("startDate")
+	endDate := r.URL.Query().Get("endDate")
+	category := r.URL.Query().Get("category")
 
-	expenses, err := e.expenseService.GetExpenses()
-	if err != nil {
-		response.Message = fmt.Sprintf("%v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response.Data)
-		return
+	if startDate != "" && endDate != "" {
+		startDateTime, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			response.Message = fmt.Sprintf("%v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		endDateTime, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			response.Message = fmt.Sprintf("%v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		fetchedExpenses, err := e.expenseService.GetExpensesByDateRange(startDateTime, endDateTime)
+		if err != nil {
+			response.Message = fmt.Sprintf("%v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		expenses = fetchedExpenses
+	} else {
+		fetchedExpenses, err := e.expenseService.GetExpenses()
+		if err != nil {
+			response.Message = fmt.Sprintf("%v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		expenses = fetchedExpenses
 	}
 
-	response.Data = expenses
+	if category != "" && expenses != nil {
+		var filteredExpenses []model.Expense
+		for _, expense := range expenses {
+			if expense.Category == category {
+				filteredExpenses = append(filteredExpenses, expense)
+			}
+		}
+		response.Data = filteredExpenses
+	} else {
+		response.Data = expenses
+	}
 	json.NewEncoder(w).Encode(response)
 }
 

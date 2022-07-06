@@ -1,15 +1,16 @@
 package service
 
 import (
-	"fmt"
 	"reimbursement_backend/model"
 	"reimbursement_backend/repository"
+	"time"
 )
 
 type ExpenseService interface {
 	CreateExpense(expense model.Expense) (model.Expense, error)
 	GetExpenses() ([]model.Expense, error)
 	DeleteExpense(id int) error
+	GetExpensesByDateRange(startDate, endDate time.Time) ([]model.Expense, error)
 }
 
 type expenseService struct {
@@ -19,7 +20,7 @@ type expenseService struct {
 func (es *expenseService) CreateExpense(e model.Expense) (model.Expense, error) {
 	expense, err := es.expenseRepository.CreateExpense(e)
 	if err != nil {
-		return model.Expense{}, fmt.Errorf("error from repo: %w", err)
+		return model.Expense{}, err
 	}
 	return expense, nil
 }
@@ -27,7 +28,15 @@ func (es *expenseService) CreateExpense(e model.Expense) (model.Expense, error) 
 func (es *expenseService) GetExpenses() ([]model.Expense, error) {
 	expenses, err := es.expenseRepository.GetExpenses()
 	if err != nil {
-		return nil, fmt.Errorf("error from repo: %w", err)
+		return nil, err
+	}
+	return expenses, nil
+}
+
+func (es *expenseService) GetExpensesByDateRange(startDate, endDate time.Time) ([]model.Expense, error) {
+	expenses, err := es.expenseRepository.GetExpensesByDateRange(startDate, endDate)
+	if err != nil {
+		return nil, err
 	}
 	return expenses, nil
 }
