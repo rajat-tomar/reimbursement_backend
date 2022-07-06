@@ -44,7 +44,7 @@ func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error
 }
 
 func (er *expenseRepository) GetExpenses() ([]model.Expense, error) {
-	sqlStatement := `SELECT id, amount FROM expenses`
+	sqlStatement := `SELECT id, amount, expense_date, category FROM expenses`
 	rows, err := er.db.Query(sqlStatement)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (er *expenseRepository) GetExpenses() ([]model.Expense, error) {
 	var expenses []model.Expense
 	for rows.Next() {
 		var expense model.Expense
-		err = rows.Scan(&expense.Id, &expense.Amount)
+		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
 		if err != nil {
 			return nil, err
 		}
