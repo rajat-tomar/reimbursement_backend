@@ -133,7 +133,6 @@ func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) 
 }
 
 func (e *expenseController) DeleteExpense(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("DeleteExpense")
 	var response model.Response
 	w.Header().Set("Content-Type", "application/json")
 	id := r.URL.Query().Get("id")

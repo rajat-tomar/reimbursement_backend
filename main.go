@@ -25,6 +25,9 @@ func runServer() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte("{\"hello\": \"world\"}"))
 	})
+
+	router.HandleFunc("/google/login", controllers.OAuthController.GoogleLogin).Methods("GET")
+	router.HandleFunc("/auth/google/callback", controllers.OAuthController.GoogleCallback).Methods("GET")
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	router.HandleFunc("/expenses", controllers.ExpenseController.GetExpenses).Methods("GET")
 	router.HandleFunc("/expense", controllers.ExpenseController.DeleteExpense).Methods("DELETE")
