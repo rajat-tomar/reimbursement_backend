@@ -11,7 +11,8 @@ type Configurations struct {
 	Db          *DatabaseConfiguration `mapstructure:"DB"`
 	Logging     *LoggingConfiguration  `mapstructure:"LOG"`
 	Server      *ServerConfiguration   `mapstructure:"SERVER"`
-	Migration   *Migration             `mapstructure:"MIGRATIONS"`
+	Migration   *Migration             `mapstructure:"MIGRATION"`
+	OAuth       *OAuth2Configuration   `mapstructure:"OAUTH"`
 }
 
 type DatabaseConfiguration struct {
@@ -21,6 +22,17 @@ type DatabaseConfiguration struct {
 	Password string `mapstructure:"PASSWORD"`
 	Port     int    `mapstructure:"PORT"`
 	SslMode  string `mapstructure:"SSL_MODE"`
+}
+
+type GoogleOAuth2Configuration struct {
+	ClientID     string   `mapstructure:"CLIENT_ID"`
+	ClientSecret string   `mapstructure:"CLIENT_SECRET"`
+	RedirectURL  string   `mapstructure:"REDIRECT_URL"`
+	Scopes       []string `mapstructure:"SCOPES"`
+}
+
+type OAuth2Configuration struct {
+	Google *GoogleOAuth2Configuration `mapstructure:"GOOGLE"`
 }
 
 type LoggingConfiguration struct {
