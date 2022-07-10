@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"reimbursement_backend/config"
-	"time"
 )
 
 const oauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
@@ -23,6 +22,7 @@ type OAuthController interface {
 
 type oauthController struct {
 	googleOauthConfig *oauth2.Config
+	oauthStateString  string
 }
 
 func NewOAuthController() *oauthController {
@@ -38,23 +38,13 @@ func NewOAuthController() *oauthController {
 }
 
 func (oauth *oauthController) GoogleLogin(w http.ResponseWriter, r *http.Request) {
-	oauthState := oauth.generateStateOAuthCookie(w)
-	url := oauth.googleOauthConfig.AuthCodeURL(oauthState)
-	fmt.Printf("Now visit this URL: %s", url)
+	oauth.oauthStateString = oauth.generateOAuthState(w)
+	url := oauth.googleOauthConfig.AuthCodeURL(oauth.oauthStateString)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func (oauth *oauthController) GoogleCallback(w http.ResponseWriter, r *http.Request) {
-	oauthState, err := r.Cookie("oauthState")
-	if err != nil {
-		fmt.Println(err)
-		log.Printf("no state cookie")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
-
-	if r.FormValue("state") != oauthState.Value {
-		fmt.Println("there is aan error here--------------")
+	if r.FormValue("state") != oauth.oauthStateString {
 		log.Println("invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
@@ -70,14 +60,14 @@ func (oauth *oauthController) GoogleCallback(w http.ResponseWriter, r *http.Requ
 	fmt.Fprintf(w, "UserInfo: %s\n", data)
 }
 
-func (oauth *oauthController) generateStateOAuthCookie(w http.ResponseWriter) string {
-	var expiration = time.Now().Add(365 * 24 * time.Hour)
+func (oauth *oauthController) generateOAuthState(w http.ResponseWriter) string {
+	//var expiration = time.Now().Add(365 * 24 * time.Hour)
 	b := make([]byte, 16)
 	rand.Read(b)
 
 	state := base64.URLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauthState", Value: state, Expires: expiration, Secure: true, HttpOnly: true}
-	http.SetCookie(w, &cookie)
+	//cookie := http.Cookie{Name: "oauthState", Value: state, Expires: expiration, Secure: true, HttpOnly: true}
+	//http.SetCookie(w, &cookie)
 
 	return state
 }
