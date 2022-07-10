@@ -93,7 +93,7 @@ func (er *expenseRepository) GetExpenses() ([]model.Expense, error) {
 		}
 		expenses = append(expenses, expense)
 	}
-	
+
 	return expenses, nil
 }
 
