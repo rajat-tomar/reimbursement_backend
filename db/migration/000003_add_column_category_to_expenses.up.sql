@@ -1,1 +1,1 @@
-alter table expenses add column if not exists category varchar not null;
+alter table expenses add column if not exists category varchar not null default 'other';
