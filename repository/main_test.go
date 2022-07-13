@@ -13,7 +13,7 @@ var testDb *sql.DB
 
 func setup() {
 	migration := config.Migration{FilePath: "../db/migration"}
-	databaseConfiguration := config.DatabaseConfiguration{
+	databaseConfiguration := config.DbConfig{
 		User:     "reimbursement",
 		DbName:   "reimbursement_test",
 		Host:     "localhost",
@@ -21,10 +21,10 @@ func setup() {
 		Port:     5432,
 		SslMode:  "disable",
 	}
-	config.Configuration = &config.Configurations{
+	config.Config = &config.Configuration{
 		Environment: "test",
 		Db:          &databaseConfiguration,
-		Logging:     &config.LoggingConfiguration{Level: "debug"},
+		Log:         &config.LogConfig{Level: "debug"},
 		Migration:   &migration,
 	}
 	config.InitDb()
