@@ -21,7 +21,7 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLogLevel() zapcore.Level {
-	switch strings.ToLower(Configuration.Logging.Level) {
+	switch strings.ToLower(Config.Log.Level) {
 	case "debug":
 		return zapcore.DebugLevel
 	case "info":

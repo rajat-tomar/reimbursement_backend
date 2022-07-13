@@ -10,16 +10,16 @@ import (
 var db *sql.DB
 
 func InitDb() {
-	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=%s",
-		Configuration.Db.User, Configuration.Db.Password, Configuration.Db.Host, Configuration.Db.Port,
-		Configuration.Db.DbName, Configuration.Db.SslMode)
-	database, err := sql.Open("postgres", dsn)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		Config.Db.User, Config.Db.Password, Config.Db.Host, Config.Db.Port,
+		Config.Db.DbName, Config.Db.SslMode)
+	database, err := sql.Open("pgx", dsn)
 	if err != nil {
-		Logger.Panicw("cannot initialize database", "error", err)
+		Logger.Panicw("cannot open the database", "error", err)
 	}
 	db = database
 	if err = db.Ping(); err != nil {
-		Logger.Panicw("cannot connect to the database", "error", err)
+		Logger.Panicw("cannot ping the database", "error", err)
 	}
 }
 

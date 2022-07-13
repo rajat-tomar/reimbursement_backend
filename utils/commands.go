@@ -10,50 +10,50 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "root",
-	Short: "This is the root command",
+	Short: "root command",
 	Long:  "It is the root command of cobra",
 }
 
 var migrateUpCommand = &cobra.Command{
 	Use:   "migrate-up",
-	Short: "It will run all the up migration",
+	Short: "run all up migrations",
 	Long:  "It will run all the up migration from the CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := db.RunDbMigrationUp(); err != nil {
-			config.Logger.Error(err)
+			config.Logger.Fatalw("Could not run up migrations successfully: ", "error", err)
 		}
 	},
 }
 
 var migrateDownCommand = &cobra.Command{
 	Use:   "migrate-down",
-	Short: "It will run all the down migration",
-	Long:  "It will run all the down migration from the CLI",
+	Short: "run all the down migrations",
+	Long:  "It will run all the down migrations from the CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := db.RunDbMigrationDown(); err != nil {
-			config.Logger.Error(err)
+			config.Logger.Fatalw("Could not run down migrations successfully: ", "error", err)
 		}
 	},
 }
 
 var createMigrationCommand = &cobra.Command{
 	Use:   "create-migration",
-	Short: "It will create migration",
-	Long:  "It will create migration from CLI",
+	Short: "create migrations",
+	Long:  "It will create migrations from CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := createMigrations(); err != nil {
-			config.Logger.Fatalw("Migration creation failed", "error", err)
+			config.Logger.Fatalw("Could not create migrations successfully: ", "error", err)
 		}
 	},
 }
 
 var rollbackLatestMigrationCommand = &cobra.Command{
 	Use:   "rollback-latest",
-	Short: "It will rollback latest migration",
+	Short: "rollback latest migration",
 	Long:  "It will rollback latest migration from CLI",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := db.RollbackLatestMigration(); err != nil {
-			config.Logger.Fatalw("Migration rollback failed", "error", err)
+			config.Logger.Fatalw("could not rollback latest migrations successfully: ", "error", err)
 		}
 	},
 }

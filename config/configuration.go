@@ -4,18 +4,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Configuration *Configurations
-
-type Configurations struct {
-	Environment string
-	Db          *DatabaseConfiguration `mapstructure:"DB"`
-	Logging     *LoggingConfiguration  `mapstructure:"LOG"`
-	Server      *ServerConfiguration   `mapstructure:"SERVER"`
-	Migration   *Migration             `mapstructure:"MIGRATION"`
-	OAuth       *OAuth2Configuration   `mapstructure:"OAUTH"`
+type Configuration struct {
+	HttpPort       int        `mapstructure:"HTTP_PORT"`
+	GoogleClientId string     `mapstructure:"GOOGLE_CLIENT_ID"`
+	Db             *DbConfig  `mapstructure:"DB"`
+	Log            *LogConfig `mapstructure:"LOG"`
+	Migration      *Migration `mapstructure:"MIGRATION"`
+	Environment    string     `mapstructure:"ENVIRONMENT"`
 }
 
-type DatabaseConfiguration struct {
+type DbConfig struct {
 	User     string `mapstructure:"USER"`
 	DbName   string `mapstructure:"NAME"`
 	Host     string `mapstructure:"HOST"`
@@ -24,39 +22,26 @@ type DatabaseConfiguration struct {
 	SslMode  string `mapstructure:"SSL_MODE"`
 }
 
-type GoogleOAuth2Configuration struct {
-	ClientID     string   `mapstructure:"CLIENT_ID"`
-	ClientSecret string   `mapstructure:"CLIENT_SECRET"`
-	RedirectURL  string   `mapstructure:"REDIRECT_URL"`
-	Scopes       []string `mapstructure:"SCOPES"`
-}
-
-type OAuth2Configuration struct {
-	Google *GoogleOAuth2Configuration `mapstructure:"GOOGLE"`
-}
-
-type LoggingConfiguration struct {
+type LogConfig struct {
 	Level string `mapstructure:"LEVEL"`
-}
-
-type ServerConfiguration struct {
-	HTTPPort int `mapstructure:"HTTP_PORT"`
 }
 
 type Migration struct {
 	FilePath string `mapstructure:"FILE_PATH"`
 }
 
+var Config *Configuration
+
 func InitConfiguration() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 	viper.SetConfigType("yaml")
+
 	if err := viper.ReadInConfig(); err != nil {
-		panic("Error reading config file" + err.Error())
+		Logger.Panicw("cannot read config file", "error", err)
 	}
-	err := viper.Unmarshal(&Configuration)
-	if err != nil {
-		Logger.Error(err)
+	if err := viper.Unmarshal(&Config); err != nil {
+		Logger.Panicw("Cannot unmarshal config", "error", err)
 	}
 }
