@@ -9,7 +9,7 @@ import (
 )
 
 type ExpenseRepository interface {
-	CreateExpense(expense model.Expense) (model.Expense, error)
+	CreateExpense(userId int, expense model.Expense) (model.Expense, error)
 	GetExpenseById(expenseID int) (model.Expense, error)
 	GetExpenses() ([]model.Expense, error)
 	DeleteExpense(expenseID int) error
@@ -33,11 +33,11 @@ func (er *expenseRepository) DeleteExpense(expenseID int) error {
 	return err
 }
 
-func (er *expenseRepository) CreateExpense(e model.Expense) (model.Expense, error) {
+func (er *expenseRepository) CreateExpense(userId int, e model.Expense) (model.Expense, error) {
 	var expense model.Expense
-	sqlStatement := `INSERT INTO expenses(amount, expense_date, category) VALUES($1, $2, $3) RETURNING id, amount, expense_date, category`
+	sqlStatement := `INSERT INTO expenses(amount, expense_date, category, user_id) VALUES($1, $2, $3, $4) RETURNING amount, expense_date, category`
 
-	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate, e.Category).Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
+	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate, e.Category, userId).Scan(&expense.Amount, &expense.ExpenseDate, &expense.Category)
 
 	return expense, err
 }

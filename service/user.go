@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"reimbursement_backend/model"
 	"reimbursement_backend/repository"
 )
@@ -23,7 +24,7 @@ func NewUserService() *userService {
 func (us *userService) FindByEmail(email string) (model.User, error) {
 	user, err := us.userRepository.FindByEmail(email)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, fmt.Errorf("failed to find user %v", err)
 	}
 
 	return user, nil
@@ -32,7 +33,7 @@ func (us *userService) FindByEmail(email string) (model.User, error) {
 func (us *userService) CreateUser(user model.User) (model.User, error) {
 	user, err := us.userRepository.CreateUser(user)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, fmt.Errorf("failed to create user %v", err)
 	}
 
 	return user, nil

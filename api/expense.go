@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	requestModel "reimbursement_backend/api/request_model"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
@@ -20,60 +21,44 @@ type expenseController struct {
 	expenseService service.ExpenseService
 }
 
-func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
-	var expense model.Expense
-	var response model.Response
-	var requestBody ExpenseRequest
-
-	w.Header().Set("Content-Type", "application/json")
-	if r.Header.Get("Content-Type") != "application/json" {
-		w.WriteHeader(http.StatusUnsupportedMediaType)
-		response = model.Response{Message: "Content-Type must be application/json"}
-		json.NewEncoder(w).Encode(response)
-		return
+func NewExpenseController() *expenseController {
+	return &expenseController{
+		expenseService: service.NewExpenseService(),
 	}
+}
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&requestBody)
-	if err != nil {
-		response.Message = fmt.Sprintf("error from json: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
+	var response model.Response
+	var requestBody requestModel.ExpenseRequest
+	email := r.Context().Value("email").(string)
+
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		err = fmt.Errorf("failed to decode request body %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
 	if requestBody.Amount <= 0 {
-		response.Message = "Amount must be greater than 0"
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		err := "Amount must be greater than 0"
+		http.Error(w, err, http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
 	if requestBody.Category == "" {
-		response.Message = "Category can't be empty"
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		err := "Category can't be empty"
+		http.Error(w, err, http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
-	expenseDate, err := time.Parse("2006-01-02", requestBody.ExpenseDate)
+	_, err := e.expenseService.CreateExpense(email, requestBody)
 	if err != nil {
-		response.Message = fmt.Sprintf("%v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-	expense.Category = requestBody.Category
-	expense.Amount = requestBody.Amount
-	expense.ExpenseDate = expenseDate
-	expense, err = e.expenseService.CreateExpense(expense)
-	if err != nil {
-		response.Message = fmt.Sprintf("%v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	response.Data = expense
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
@@ -154,10 +139,4 @@ func (e *expenseController) DeleteExpense(w http.ResponseWriter, r *http.Request
 
 	response.Message = "Expense deleted"
 	json.NewEncoder(w).Encode(response)
-}
-
-func NewExpenseController() *expenseController {
-	return &expenseController{
-		expenseService: service.NewExpenseService(),
-	}
 }
