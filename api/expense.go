@@ -8,7 +8,6 @@ import (
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
-	"time"
 )
 
 type ExpenseController interface {
@@ -38,83 +37,35 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
-	if requestBody.Amount <= 0 {
-		err := "Amount must be greater than 0"
-		http.Error(w, err, http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(response)
-		return
-	}
-	if requestBody.Category == "" {
-		err := "Category can't be empty"
-		http.Error(w, err, http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(response)
-		return
-	}
-	_, err := e.expenseService.CreateExpense(email, requestBody)
+	_, statusCode, err := e.expenseService.CreateExpense(email, requestBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), statusCode)
 		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(statusCode)
 	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
 	var response model.Response
 	var expenses []model.Expense
-	w.Header().Set("Content-Type", "application/json")
+	email := r.Context().Value("email").(string)
 	startDate := r.URL.Query().Get("startDate")
 	endDate := r.URL.Query().Get("endDate")
 	category := r.URL.Query().Get("category")
 
-	if startDate != "" && endDate != "" {
-		startDateTime, err := time.Parse("2006-01-02", startDate)
-		if err != nil {
-			response.Message = fmt.Sprintf("%v", err)
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		endDateTime, err := time.Parse("2006-01-02", endDate)
-		if err != nil {
-			response.Message = fmt.Sprintf("%v", err)
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		fetchedExpenses, err := e.expenseService.GetExpensesByDateRange(startDateTime, endDateTime)
-		if err != nil {
-			response.Message = fmt.Sprintf("%v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		expenses = fetchedExpenses
-	} else {
-		fetchedExpenses, err := e.expenseService.GetExpenses()
-		if err != nil {
-			response.Message = fmt.Sprintf("%v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		expenses = fetchedExpenses
+	expenses, statusCode, err := e.expenseService.GetExpenses(email, startDate, endDate, category)
+	if err != nil {
+		http.Error(w, err.Error(), statusCode)
+		_ = json.NewEncoder(w).Encode(response)
+		return
 	}
+	response.Data = expenses
 
-	if category != "" && expenses != nil {
-		var filteredExpenses []model.Expense
-		for _, expense := range expenses {
-			if expense.Category == category {
-				filteredExpenses = append(filteredExpenses, expense)
-			}
-		}
-		response.Data = filteredExpenses
-	} else {
-		response.Data = expenses
-	}
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e *expenseController) DeleteExpense(w http.ResponseWriter, r *http.Request) {

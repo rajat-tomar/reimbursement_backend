@@ -11,9 +11,9 @@ import (
 type ExpenseRepository interface {
 	CreateExpense(userId int, expense model.Expense) (model.Expense, error)
 	GetExpenseById(expenseID int) (model.Expense, error)
-	GetExpenses() ([]model.Expense, error)
+	GetExpenses(userId int) ([]model.Expense, error)
 	DeleteExpense(expenseID int) error
-	GetExpensesByDateRange(startDate, endDate time.Time) ([]model.Expense, error)
+	GetExpensesByDateRange(userId int, startDate, endDate time.Time) ([]model.Expense, error)
 }
 
 type expenseRepository struct {
@@ -51,19 +51,25 @@ func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error
 	return expense, err
 }
 
-func (er *expenseRepository) GetExpensesByDateRange(startDate, endDate time.Time) ([]model.Expense, error) {
+func (er *expenseRepository) GetExpensesByDateRange(userID int, startDate, endDate time.Time) ([]model.Expense, error) {
 	var expenses []model.Expense
-	sqlStatement := `SELECT id, amount, expense_date, category FROM expenses WHERE expense_date BETWEEN $1 AND $2`
+	sqlStatement := `SELECT amount, expense_date, category FROM expenses WHERE expense_date BETWEEN $1 AND $2 AND user_id = $3`
 
-	rows, err := er.db.Query(sqlStatement, startDate, endDate)
+	rows, err := er.db.Query(sqlStatement, startDate, endDate, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("no expenses found: %v", err)
 	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			config.Logger.Panicw("error closing rows", "error", err)
+		}
+	}(rows)
 	for rows.Next() {
 		var expense model.Expense
-		err := rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
+		err := rows.Scan(&expense.Amount, &expense.ExpenseDate, &expense.Category)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error scanning row: %v", err)
 		}
 		expenses = append(expenses, expense)
 	}
@@ -71,25 +77,25 @@ func (er *expenseRepository) GetExpensesByDateRange(startDate, endDate time.Time
 	return expenses, nil
 }
 
-func (er *expenseRepository) GetExpenses() ([]model.Expense, error) {
+func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 	var expenses []model.Expense
-	sqlStatement := `SELECT id, amount, expense_date, category FROM expenses`
+	sqlStatement := `SELECT amount, expense_date, category FROM expenses WHERE user_id = $1`
 
-	rows, err := er.db.Query(sqlStatement)
+	rows, err := er.db.Query(sqlStatement, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("no expenses found: %v", err)
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			panic(err)
+			config.Logger.Panicw("error closing rows", "error", err)
 		}
 	}(rows)
 	for rows.Next() {
 		var expense model.Expense
-		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
+		err = rows.Scan(&expense.Amount, &expense.ExpenseDate, &expense.Category)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error scanning row: %v", err)
 		}
 		expenses = append(expenses, expense)
 	}

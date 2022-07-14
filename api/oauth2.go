@@ -24,9 +24,7 @@ func NewOAuthController() *oauthController {
 func (oauth *oauthController) Login(w http.ResponseWriter, r *http.Request) {
 	var response model.Response
 	var requestUser model.User
-	name := r.Context().Value("name")
 	email := r.Context().Value("email")
-	requestUser.Name = name.(string)
 	requestUser.Email = email.(string)
 
 	err := oauth.oauthService.Login(requestUser)
