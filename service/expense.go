@@ -44,7 +44,7 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 		return model.Expense{}, http.StatusFailedDependency, fmt.Errorf("failed to create expense: %v", err)
 	}
 
-	return createdExpense, http.StatusOK, nil
+	return createdExpense, http.StatusCreated, nil
 }
 
 func (es *expenseService) GetExpenses(email, startDate, endDate, category string) ([]model.Expense, int, error) {

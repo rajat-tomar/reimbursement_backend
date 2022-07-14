@@ -80,7 +80,7 @@ func runServer() {
 		_, err := w.Write([]byte("Hello, world!. This is the Reimbursement Backend."))
 		if err != nil {
 			log.Println(err)
-			return
+			config.Logger.Panicf("Error writing to response writer: %v", err)
 		}
 	}).Methods("GET")
 	router.HandleFunc("/login", controllers.OAuthController.Login).Methods("POST")
