@@ -12,12 +12,19 @@ import (
 type ExpenseService interface {
 	CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error)
 	GetExpenses(email, startDate, endDate, category string) ([]model.Expense, int, error)
-	DeleteExpense(id int) error
+	DeleteExpense(email string, expenseId int) (int, error)
 }
 
 type expenseService struct {
 	expenseRepository repository.ExpenseRepository
 	userService       UserService
+}
+
+func NewExpenseService() *expenseService {
+	return &expenseService{
+		expenseRepository: repository.NewExpenseRepository(),
+		userService:       NewUserService(),
+	}
 }
 
 func (es *expenseService) CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error) {
@@ -92,18 +99,20 @@ func (es *expenseService) GetExpenses(email, startDate, endDate, category string
 	return expenses, http.StatusOK, nil
 }
 
-func (es *expenseService) DeleteExpense(id int) error {
-	err := es.expenseRepository.DeleteExpense(id)
+func (es *expenseService) DeleteExpense(email string, expenseId int) (int, error) {
+	user, err := es.userService.FindByEmail(email)
 	if err != nil {
-		return fmt.Errorf("failed to delete expense: %v", err)
+		return http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
+	}
+	userId := user.Id
+
+	if expenseId <= 0 {
+		return http.StatusBadRequest, fmt.Errorf("expense id must be greater than 0")
+	}
+	err = es.expenseRepository.DeleteExpense(userId, expenseId)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to delete expense: %v", err)
 	}
 
-	return nil
-}
-
-func NewExpenseService() *expenseService {
-	return &expenseService{
-		expenseRepository: repository.NewExpenseRepository(),
-		userService:       NewUserService(),
-	}
+	return http.StatusNoContent, nil
 }

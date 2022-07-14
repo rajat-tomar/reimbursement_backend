@@ -70,24 +70,17 @@ func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) 
 
 func (e *expenseController) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 	var response model.Response
-	w.Header().Set("Content-Type", "application/json")
+	email := r.Context().Value("email").(string)
 	id := r.URL.Query().Get("id")
 	expenseId, _ := strconv.Atoi(id)
-	if expenseId <= 0 {
-		response.Message = "either id is empty or invalid"
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
-	err := e.expenseService.DeleteExpense(expenseId)
+	statusCode, err := e.expenseService.DeleteExpense(email, expenseId)
 	if err != nil {
-		response.Message = fmt.Sprintf("%v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		http.Error(w, err.Error(), statusCode)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	response.Message = "Expense deleted"
-	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(response)
 }
