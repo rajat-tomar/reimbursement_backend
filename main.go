@@ -65,7 +65,7 @@ func runServer() {
 	controllers := api.NewControllers()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://accounts.google.com/", "http://localhost:3000"},
+		AllowedOrigins:   []string{"https://accounts.google.com/", "http://localhost:3000", "https://reimbursement.gaussb.io"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Requested-With"},
 		ExposedHeaders:   []string{"Link"},
