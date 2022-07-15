@@ -110,7 +110,8 @@ jobs:
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
 
       - name: Move Migrations to Remote Instance
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
+        run: |
+          ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
           scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
 
       - name: Move Binary to Remote Instance
