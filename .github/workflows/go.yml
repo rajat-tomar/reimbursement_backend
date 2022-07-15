@@ -106,16 +106,16 @@ jobs:
       - name: Move config.yaml File to Remote
         run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no config.yaml reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/config.yaml
 
-      - name: Change file access mode
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
+      - name: Move Binary to Remote Instance
+        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
 
       - name: Move Migrations to Remote Instance
         run: |
           ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
           scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
 
-      - name: Move Binary to Remote Instance
-        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
+      - name: Change file access mode
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
 
       - name: Run Up Migrations
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "./reimbursement_backend migrate-up"
