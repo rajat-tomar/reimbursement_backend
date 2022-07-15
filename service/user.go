@@ -9,6 +9,7 @@ import (
 type UserService interface {
 	FindByEmail(email string) (model.User, error)
 	CreateUser(user model.User) (model.User, error)
+	GetUsers() ([]model.User, error)
 }
 
 type userService struct {
@@ -37,4 +38,13 @@ func (us *userService) CreateUser(user model.User) (model.User, error) {
 	}
 
 	return user, nil
+}
+
+func (us *userService) GetUsers() ([]model.User, error) {
+	users, err := us.userRepository.GetUsers()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users %v", err)
+	}
+
+	return users, nil
 }
