@@ -29,12 +29,13 @@ func (oauth *oauthController) Login(w http.ResponseWriter, r *http.Request) {
 	requestUser.Name = name.(string)
 	requestUser.Email = email.(string)
 
-	err := oauth.oauthService.Login(requestUser)
+	role, err := oauth.oauthService.Login(requestUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
 
+	response.Data = map[string]string{"role": role}
 	_ = json.NewEncoder(w).Encode(response)
 }

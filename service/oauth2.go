@@ -6,7 +6,7 @@ import (
 )
 
 type OAuthService interface {
-	Login(user model.User) error
+	Login(user model.User) (string, error)
 	FindByEmail(email string) (model.User, error)
 	CreateUser(user model.User) (model.User, error)
 }
@@ -21,16 +21,16 @@ func NewOAuthService() *oauthService {
 	}
 }
 
-func (oauth *oauthService) Login(user model.User) error {
-	_, err := oauth.FindByEmail(user.Email)
+func (oauth *oauthService) Login(user model.User) (string, error) {
+	usr, err := oauth.FindByEmail(user.Email)
 	if err != nil {
-		_, err = oauth.CreateUser(user)
+		usr, err = oauth.CreateUser(user)
 		if err != nil {
-			return fmt.Errorf("failed to login %v", err)
+			return "", fmt.Errorf("failed to login %v", err)
 		}
 	}
 
-	return nil
+	return usr.Role, nil
 }
 
 func (oauth *oauthService) FindByEmail(email string) (model.User, error) {
