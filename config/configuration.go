@@ -11,6 +11,12 @@ type Configuration struct {
 	Log            *LogConfig `mapstructure:"LOG"`
 	Migration      *Migration `mapstructure:"MIGRATION"`
 	Environment    string     `mapstructure:"ENVIRONMENT"`
+	Email          *Email     `mapstructure:"EMAIL"`
+}
+
+type Email struct {
+	AdminEmail string `mapstructure:"ADMIN_EMAIL"`
+	CAEmail    string `mapstructure:"CA_EMAIL"`
 }
 
 type DbConfig struct {
