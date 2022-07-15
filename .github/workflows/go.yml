@@ -92,22 +92,32 @@ jobs:
           echo "  LEVEL: ${{secrets.LOG_LEVEL}}" >> config.yaml
           echo "MIGRATION:" >> config.yaml
           echo "  FILE_PATH: \"db/migration\"" >> config.yaml
+          echo "EMAIL:" >> config.yaml
+          echo "  ADMIN_EMAIL: ${{secrets.ADMIN_EMAIL}}" >> config.yaml
+          echo "  CA_EMAIL: ${{secrets.CA_EMAIL}}" >> config.yaml
 
-      - name: Remove previous binary and config.yaml file from remote instance
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;"
+      - name: Remove previous binary, database migrations and config.yaml file from remote instance
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;rm -rf db/migration/*"
 
       - name: Kill the process
         continue-on-error: true
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
-
-      - name: Move Binary to Remote Instance
-        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
 
       - name: Move config.yaml File to Remote
         run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no config.yaml reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/config.yaml
 
       - name: Change file access mode
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
+
+      - name: Move Migrations to Remote Instance
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
+        scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
+
+      - name: Move Binary to Remote Instance
+        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
+
+      - name: Run Up Migrations
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "./reimbursement_backend migrate-up"
 
       - name: Start the service to run the updated binary
         run: ssh -i reimbursement_id_rsa -o  StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl start reimbursement.service"
