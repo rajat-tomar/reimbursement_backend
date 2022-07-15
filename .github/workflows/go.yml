@@ -111,7 +111,7 @@ jobs:
 
       - name: Move Migrations to Remote Instance
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
-        scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
+          scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
 
       - name: Move Binary to Remote Instance
         run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
