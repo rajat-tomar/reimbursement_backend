@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -97,13 +98,21 @@ func getDSN() string {
 }
 
 func createFile(filename string) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		config.Logger.Error(err)
-		return err
+	if len(filename) == 0 {
+		return errors.New("file name is required")
 	}
 
-	err = f.Close()
+	file, err := os.Create(filename)
+	if err != nil {
+		config.Logger.Error(err)
+		return fmt.Errorf("failed to create file %s: %v", filename, err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			config.Logger.Error(err)
+		}
+	}(file)
 
-	return err
+	return nil
 }
