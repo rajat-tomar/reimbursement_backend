@@ -15,6 +15,10 @@ import (
 
 func filterContentTypeMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			handler.ServeHTTP(w, r)
+			return
+		}
 		if r.Header.Get("Content-Type") != "application/json" {
 			w.WriteHeader(http.StatusUnsupportedMediaType)
 			return
@@ -28,6 +32,10 @@ func filterContentTypeMiddleware(handler http.Handler) http.Handler {
 
 func authenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		reqToken := r.Header.Get("Authorization")
 		if reqToken == "" {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -62,31 +70,30 @@ func RunServer() {
 	address := fmt.Sprintf(":%d", port)
 	router := mux.NewRouter()
 	controllers := api.NewControllers()
-
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://accounts.google.com/", "http://localhost:3000", "https://reimbursement.gaussb.io"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://reimbursement.gaussb.io"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Requested-With"},
 		ExposedHeaders:   []string{"Link"},
 		MaxAge:           300,
 		AllowCredentials: true,
 	})
+
 	router.Use(filterContentTypeMiddleware)
 	router.Use(authenticationMiddleware)
 	handler := c.Handler(router)
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte("Hello, world!. This is the Reimbursement Backend."))
+		_, err := w.Write([]byte("Hello, world! This is the Reimbursement Backend."))
 		if err != nil {
-			log.Println(err)
 			config.Logger.Panicf("Error writing to response writer: %v", err)
 		}
 	}).Methods("GET")
-	router.HandleFunc("/login", controllers.OAuthController.Login).Methods("POST")
+	router.HandleFunc("/login", controllers.UserController.Login).Methods("POST")
+	router.HandleFunc("/users", controllers.UserController.GetUsers).Methods("GET")
 	router.HandleFunc("/expenses", controllers.ExpenseController.GetExpenses).Methods("GET")
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	router.HandleFunc("/expense", controllers.ExpenseController.DeleteExpense).Methods("DELETE")
-	router.HandleFunc("/users", controllers.UserController.GetUsers).Methods("GET")
 
 	log.Println("Server is running on port", port)
 	log.Fatal(http.ListenAndServe(address, handler))
