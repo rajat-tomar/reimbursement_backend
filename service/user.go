@@ -7,6 +7,7 @@ import (
 )
 
 type UserService interface {
+	Login(user model.User) (string, error)
 	FindByEmail(email string) (model.User, error)
 	CreateUser(user model.User) (model.User, error)
 	GetUsers() ([]model.User, error)
@@ -22,6 +23,18 @@ func NewUserService() *userService {
 	}
 }
 
+func (us *userService) Login(user model.User) (string, error) {
+	loginUser, err := us.FindByEmail(user.Email)
+	if err != nil {
+		loginUser, err = us.CreateUser(user)
+		if err != nil {
+			return "", fmt.Errorf("failed to login %v", err)
+		}
+	}
+
+	return loginUser.Role, nil
+}
+
 func (us *userService) FindByEmail(email string) (model.User, error) {
 	user, err := us.userRepository.FindByEmail(email)
 	if err != nil {
@@ -32,12 +45,12 @@ func (us *userService) FindByEmail(email string) (model.User, error) {
 }
 
 func (us *userService) CreateUser(user model.User) (model.User, error) {
-	user, err := us.userRepository.CreateUser(user)
+	createdUser, err := us.userRepository.CreateUser(user)
 	if err != nil {
 		return model.User{}, fmt.Errorf("failed to create user %v", err)
 	}
 
-	return user, nil
+	return createdUser, nil
 }
 
 func (us *userService) GetUsers() ([]model.User, error) {
