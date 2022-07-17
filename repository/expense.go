@@ -46,7 +46,7 @@ func (er *expenseRepository) CreateExpense(userId int, e model.Expense) (model.E
 
 func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 	var expenses []model.Expense
-	sqlStatement := `SELECT id, amount, expense_date, category FROM expenses WHERE user_id = $1`
+	sqlStatement := `SELECT id, amount, expense_date, category, user_id FROM expenses WHERE user_id = $1`
 
 	rows, err := er.db.Query(sqlStatement, userId)
 	if err != nil {
@@ -60,7 +60,7 @@ func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 	}(rows)
 	for rows.Next() {
 		var expense model.Expense
-		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
+		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category, &expense.UserId)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}

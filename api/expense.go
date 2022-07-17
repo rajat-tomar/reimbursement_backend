@@ -55,8 +55,10 @@ func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) 
 	startDate := r.URL.Query().Get("startDate")
 	endDate := r.URL.Query().Get("endDate")
 	category := r.URL.Query().Get("category")
+	userId := r.URL.Query().Get("userId")
+	userIdInt, _ := strconv.Atoi(userId)
 
-	expenses, statusCode, err := e.expenseService.GetExpenses(email, startDate, endDate, category)
+	expenses, statusCode, err := e.expenseService.GetExpenses(email, startDate, endDate, category, userIdInt)
 	if err != nil {
 		http.Error(w, err.Error(), statusCode)
 		_ = json.NewEncoder(w).Encode(response)

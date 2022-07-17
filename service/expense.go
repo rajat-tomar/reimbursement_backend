@@ -11,7 +11,7 @@ import (
 
 type ExpenseService interface {
 	CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error)
-	GetExpenses(email, startDate, endDate, category string) ([]model.Expense, int, error)
+	GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error)
 	DeleteExpense(email string, expenseId int) (int, error)
 }
 
@@ -54,13 +54,16 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 	return createdExpense, http.StatusCreated, nil
 }
 
-func (es *expenseService) GetExpenses(email, startDate, endDate, category string) ([]model.Expense, int, error) {
+func (es *expenseService) GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error) {
 	var expenses []model.Expense
-	user, err := es.userService.FindByEmail(email)
-	if err != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
+	if !(userId > 0) {
+		user, err := es.userService.FindByEmail(email)
+		if err != nil {
+			return nil, http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
+		}
+
+		userId = user.Id
 	}
-	userId := user.Id
 
 	if startDate != "" && endDate != "" {
 		startDateTime, err := time.Parse("2006-01-02", startDate)
