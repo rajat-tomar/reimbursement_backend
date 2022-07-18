@@ -23,7 +23,6 @@ func NewUserController() *userController {
 }
 
 func (uc *userController) Login(w http.ResponseWriter, r *http.Request) {
-	var response model.Response
 	var requestUser model.User
 	name := r.Context().Value("name")
 	email := r.Context().Value("email")
@@ -37,13 +36,10 @@ func (uc *userController) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	response.Data = map[string]string{"role": role}
-	_ = json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(role)
 }
 
 func (uc *userController) GetUsers(w http.ResponseWriter, r *http.Request) {
-	var response model.Response
-
 	users, err := uc.userService.GetUsers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -51,6 +47,5 @@ func (uc *userController) GetUsers(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	response.Data = users
-	_ = json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(users)
 }
