@@ -30,8 +30,8 @@ func NewExpenseRepository() *expenseRepository {
 func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error) {
 	var expense model.Expense
 
-	sqlStatement := `SELECT id, amount FROM expenses WHERE Id = $1`
-	err := er.db.QueryRow(sqlStatement, expenseID).Scan(&expense.Id, &expense.Amount)
+	sqlStatement := `SELECT id, amount, category, expense_date, user_id, status FROM expenses WHERE Id = $1`
+	err := er.db.QueryRow(sqlStatement, expenseID).Scan(&expense.Id, &expense.Amount, &expense.Category, &expense.ExpenseDate, &expense.UserId, &expense.Status)
 
 	return expense, err
 }

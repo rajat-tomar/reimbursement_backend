@@ -11,6 +11,7 @@ import (
 )
 
 type ExpenseController interface {
+	GetExpenseById(w http.ResponseWriter, r *http.Request)
 	CreateExpense(w http.ResponseWriter, r *http.Request)
 	GetExpenses(w http.ResponseWriter, r *http.Request)
 	DeleteExpense(w http.ResponseWriter, r *http.Request)
@@ -25,6 +26,21 @@ func NewExpenseController() *expenseController {
 	return &expenseController{
 		expenseService: service.NewExpenseService(),
 	}
+}
+
+func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Request) {
+	var expense model.Expense
+	id := r.URL.Query().Get("id")
+	expenseId, _ := strconv.Atoi(id)
+
+	expense, statusCode, err := e.expenseService.GetExpenseById(expenseId)
+	if err != nil {
+		http.Error(w, err.Error(), statusCode)
+		return
+	}
+
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(expense)
 }
 
 func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {

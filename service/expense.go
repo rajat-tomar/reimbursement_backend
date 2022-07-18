@@ -11,6 +11,7 @@ import (
 )
 
 type ExpenseService interface {
+	GetExpenseById(expenseId int) (model.Expense, int, error)
 	CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error)
 	GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error)
 	DeleteExpense(email string, expenseId int) (int, error)
@@ -27,6 +28,18 @@ func NewExpenseService() *expenseService {
 		expenseRepository: repository.NewExpenseRepository(),
 		userService:       NewUserService(),
 	}
+}
+
+func (es *expenseService) GetExpenseById(expenseId int) (model.Expense, int, error) {
+	if expenseId <= 0 {
+		return model.Expense{}, http.StatusBadRequest, fmt.Errorf("expense id must be greater than 0")
+	}
+	expense, err := es.expenseRepository.GetExpenseById(expenseId)
+	if err != nil {
+		return model.Expense{}, http.StatusNotFound, fmt.Errorf("failed to get expense: %v", err)
+	}
+
+	return expense, http.StatusOK, nil
 }
 
 func (es *expenseService) CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error) {
@@ -85,7 +98,7 @@ func (es *expenseService) GetExpenses(email, startDate, endDate, category string
 	} else {
 		fetchedExpenses, err := es.expenseRepository.GetExpenses(userId)
 		if err != nil {
-			return nil, http.StatusInternalServerError, fmt.Errorf("failed to get expenses: %v", err)
+			return nil, http.StatusNotFound, fmt.Errorf("failed to get expenses: %v", err)
 		}
 
 		expenses = fetchedExpenses
@@ -124,7 +137,7 @@ func (es *expenseService) DeleteExpense(email string, expenseId int) (int, error
 
 func (es *expenseService) UpdateExpense(expenseId string, requestBody request_model.ExpenseRequest) (int, error) {
 	var expense model.Expense
-	
+
 	if expenseId == "" {
 		return http.StatusBadRequest, fmt.Errorf("expense id is required")
 	}

@@ -91,6 +91,7 @@ func RunServer() {
 	}).Methods("GET")
 	router.HandleFunc("/login", controllers.UserController.Login).Methods("POST")
 	router.HandleFunc("/users", controllers.UserController.GetUsers).Methods("GET")
+	router.HandleFunc("/expense", controllers.ExpenseController.GetExpenseById).Methods("GET")
 	router.HandleFunc("/expenses", controllers.ExpenseController.GetExpenses).Methods("GET")
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	router.HandleFunc("/expense", controllers.ExpenseController.DeleteExpense).Methods("DELETE")
