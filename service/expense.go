@@ -6,6 +6,7 @@ import (
 	"reimbursement_backend/api/request_model"
 	"reimbursement_backend/model"
 	"reimbursement_backend/repository"
+	"strconv"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type ExpenseService interface {
 	CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error)
 	GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error)
 	DeleteExpense(email string, expenseId int) (int, error)
+	UpdateExpense(expenseId string, requestBody request_model.ExpenseRequest) (int, error)
 }
 
 type expenseService struct {
@@ -115,6 +117,26 @@ func (es *expenseService) DeleteExpense(email string, expenseId int) (int, error
 	err = es.expenseRepository.DeleteExpense(userId, expenseId)
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("failed to delete expense: %v", err)
+	}
+
+	return http.StatusNoContent, nil
+}
+
+func (es *expenseService) UpdateExpense(expenseId string, requestBody request_model.ExpenseRequest) (int, error) {
+	var expense model.Expense
+	
+	if expenseId == "" {
+		return http.StatusBadRequest, fmt.Errorf("expense id is required")
+	}
+	expenseIdInt, err := strconv.Atoi(expenseId)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to convert expense id to int: %v", err)
+	}
+	expense.Id = expenseIdInt
+	expense.Status = requestBody.Status
+	err = es.expenseRepository.UpdateExpense(expense)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to update expense: %v", err)
 	}
 
 	return http.StatusNoContent, nil

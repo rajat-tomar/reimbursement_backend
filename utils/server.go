@@ -94,6 +94,7 @@ func RunServer() {
 	router.HandleFunc("/expenses", controllers.ExpenseController.GetExpenses).Methods("GET")
 	router.HandleFunc("/expense", controllers.ExpenseController.CreateExpense).Methods("POST")
 	router.HandleFunc("/expense", controllers.ExpenseController.DeleteExpense).Methods("DELETE")
+	router.HandleFunc("/expense", controllers.ExpenseController.UpdateExpense).Methods("PUT")
 
 	log.Println("Server is running on port", port)
 	log.Fatal(http.ListenAndServe(address, handler))

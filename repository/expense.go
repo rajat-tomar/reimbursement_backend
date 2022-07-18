@@ -14,6 +14,7 @@ type ExpenseRepository interface {
 	GetExpenses(userId int) ([]model.Expense, error)
 	GetExpensesByDateRange(userId int, startDate, endDate time.Time) ([]model.Expense, error)
 	DeleteExpense(userId, expenseId int) error
+	UpdateExpense(expense model.Expense) error
 }
 
 type expenseRepository struct {
@@ -37,16 +38,16 @@ func (er *expenseRepository) GetExpenseById(expenseID int) (model.Expense, error
 
 func (er *expenseRepository) CreateExpense(userId int, e model.Expense) (model.Expense, error) {
 	var expense model.Expense
-	sqlStatement := `INSERT INTO expenses(amount, expense_date, category, user_id) VALUES($1, $2, $3, $4) RETURNING amount, expense_date, category`
+	sqlStatement := `INSERT INTO expenses(amount, expense_date, category, user_id, status) VALUES($1, $2, $3, $4, $5) RETURNING amount, expense_date, category`
 
-	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate, e.Category, userId).Scan(&expense.Amount, &expense.ExpenseDate, &expense.Category)
+	err := er.db.QueryRow(sqlStatement, e.Amount, e.ExpenseDate, e.Category, userId, "pending").Scan(&expense.Amount, &expense.ExpenseDate, &expense.Category)
 
 	return expense, err
 }
 
 func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 	var expenses []model.Expense
-	sqlStatement := `SELECT id, amount, expense_date, category, user_id FROM expenses WHERE user_id = $1`
+	sqlStatement := `SELECT id, amount, expense_date, category, user_id, status FROM expenses WHERE user_id = $1`
 
 	rows, err := er.db.Query(sqlStatement, userId)
 	if err != nil {
@@ -60,7 +61,7 @@ func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 	}(rows)
 	for rows.Next() {
 		var expense model.Expense
-		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category, &expense.UserId)
+		err = rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category, &expense.UserId, &expense.Status)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}
@@ -105,6 +106,15 @@ func (er *expenseRepository) DeleteExpense(userId, expenseId int) error {
 		return fmt.Errorf("no expense found: %v", err)
 	}
 	_, err = er.db.Exec(sqlStatement, expenseId, userId)
+
+	return err
+}
+
+func (er *expenseRepository) UpdateExpense(e model.Expense) error {
+	var expense model.Expense
+	sqlStatement := `UPDATE expenses SET status = $1 WHERE id = $2 RETURNING id, amount, expense_date, category, user_id, status`
+
+	err := er.db.QueryRow(sqlStatement, e.Status, e.Id).Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category, &expense.UserId, &expense.Status)
 
 	return err
 }
