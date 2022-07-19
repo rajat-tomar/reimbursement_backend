@@ -31,7 +31,11 @@ func NewExpenseController() *expenseController {
 func (e *expenseController) GetExpenseById(w http.ResponseWriter, r *http.Request) {
 	var expense model.Expense
 	id := r.URL.Query().Get("id")
-	expenseId, _ := strconv.Atoi(id)
+	expenseId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	expense, statusCode, err := e.expenseService.GetExpenseById(expenseId)
 	if err != nil {
