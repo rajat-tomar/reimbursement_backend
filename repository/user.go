@@ -8,9 +8,9 @@ import (
 )
 
 type UserRepository interface {
-	FindByEmail(email string) (model.User, error)
 	CreateUser(user model.User) (model.User, error)
 	GetUsers() ([]model.User, error)
+	GetUserByEmail(email string) (model.User, error)
 }
 
 type userRepository struct {
@@ -42,7 +42,7 @@ func (ur *userRepository) CreateUser(user model.User) (model.User, error) {
 	return createdUser, err
 }
 
-func (ur *userRepository) FindByEmail(email string) (model.User, error) {
+func (ur *userRepository) GetUserByEmail(email string) (model.User, error) {
 	var foundUser model.User
 	sqlStatement := `SELECT id, name, email, role FROM users where email = $1`
 
@@ -57,7 +57,7 @@ func (ur *userRepository) GetUsers() ([]model.User, error) {
 
 	rows, err := ur.db.Query(sqlStatement)
 	if err != nil {
-		return nil, fmt.Errorf("could not fetch users: %v", err)
+		return nil, fmt.Errorf("repo: could not fetch users: %v", err)
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -69,7 +69,7 @@ func (ur *userRepository) GetUsers() ([]model.User, error) {
 		var user model.User
 		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Role)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning row: %v", err)
+			return nil, fmt.Errorf("repo: error scanning users: %v", err)
 		}
 		users = append(users, user)
 	}

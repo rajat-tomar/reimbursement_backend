@@ -44,7 +44,7 @@ func (es *expenseService) GetExpenseById(expenseId int) (model.Expense, int, err
 
 func (es *expenseService) CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error) {
 	var expense model.Expense
-	user, err := es.userService.FindByEmail(email)
+	user, err := es.userService.GetUserByEmail(email)
 	if err != nil {
 		return model.Expense{}, http.StatusInternalServerError, fmt.Errorf("failed to create expense: %v", err)
 	}
@@ -72,7 +72,7 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 func (es *expenseService) GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error) {
 	var expenses []model.Expense
 	if !(userId > 0) {
-		user, err := es.userService.FindByEmail(email)
+		user, err := es.userService.GetUserByEmail(email)
 		if err != nil {
 			return nil, http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
 		}
@@ -118,7 +118,7 @@ func (es *expenseService) GetExpenses(email, startDate, endDate, category string
 }
 
 func (es *expenseService) DeleteExpense(email string, expenseId int) (int, error) {
-	user, err := es.userService.FindByEmail(email)
+	user, err := es.userService.GetUserByEmail(email)
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
 	}
