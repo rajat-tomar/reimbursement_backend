@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
+	"strconv"
 )
 
 type ReimbursementController interface {
@@ -40,14 +41,25 @@ func (rmb *reimbursementController) CreateReimbursement(w http.ResponseWriter, r
 }
 
 func (rmb *reimbursementController) GetReimbursements(w http.ResponseWriter, r *http.Request) {
-	email := r.Context().Value("email").(string)
+	var userId int
+	id := r.URL.Query().Get("userId")
 
-	user, err := rmb.reimbursementService.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if id == "" {
+		email := r.Context().Value("email").(string)
+		user, err := rmb.reimbursementService.GetUserByEmail(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		userId = user.Id
+	} else {
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		userId = idInt
 	}
-	userId := user.Id
 	reimbursements, err := rmb.reimbursementService.GetReimbursements(userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
