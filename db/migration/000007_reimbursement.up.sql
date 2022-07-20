@@ -4,6 +4,7 @@ CREATE TABLE reimbursements
     amount       INTEGER,
     user_id      INTEGER,
     expense_id   INTEGER,
+    category     TEXT,
     status       TEXT,
     processed_on DATE,
     FOREIGN KEY (user_id) REFERENCES users (id),
