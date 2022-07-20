@@ -9,6 +9,7 @@ import (
 
 type ReimbursementController interface {
 	CreateReimbursement(w http.ResponseWriter, r *http.Request)
+	GetReimbursements(w http.ResponseWriter, r *http.Request)
 }
 
 type reimbursementController struct {
@@ -36,4 +37,23 @@ func (rmb *reimbursementController) CreateReimbursement(w http.ResponseWriter, r
 
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(createdReimbursement)
+}
+
+func (rmb *reimbursementController) GetReimbursements(w http.ResponseWriter, r *http.Request) {
+	email := r.Context().Value("email").(string)
+
+	user, err := rmb.reimbursementService.GetUserByEmail(email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	userId := user.Id
+	reimbursements, err := rmb.reimbursementService.GetReimbursements(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(reimbursements)
 }
