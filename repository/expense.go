@@ -73,7 +73,7 @@ func (er *expenseRepository) GetExpenses(userId int) ([]model.Expense, error) {
 
 func (er *expenseRepository) GetExpensesByDateRange(userID int, startDate, endDate time.Time) ([]model.Expense, error) {
 	var expenses []model.Expense
-	sqlStatement := `SELECT id, amount, expense_date, category FROM expenses WHERE expense_date BETWEEN $1 AND $2 AND user_id = $3`
+	sqlStatement := `SELECT id, amount, expense_date, category, status FROM expenses WHERE expense_date BETWEEN $1 AND $2 AND user_id = $3`
 
 	rows, err := er.db.Query(sqlStatement, startDate, endDate, userID)
 	if err != nil {
@@ -87,7 +87,7 @@ func (er *expenseRepository) GetExpensesByDateRange(userID int, startDate, endDa
 	}(rows)
 	for rows.Next() {
 		var expense model.Expense
-		err := rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category)
+		err := rows.Scan(&expense.Id, &expense.Amount, &expense.ExpenseDate, &expense.Category, &expense.Status)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}

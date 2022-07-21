@@ -8,6 +8,7 @@ import (
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
+	"time"
 )
 
 type ExpenseController interface {
@@ -67,20 +68,57 @@ func (e *expenseController) CreateExpense(w http.ResponseWriter, r *http.Request
 
 func (e *expenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
 	var expenses []model.Expense
-	email := r.Context().Value("email").(string)
+	var userId int
+	id := r.URL.Query().Get("userId")
 	startDate := r.URL.Query().Get("startDate")
 	endDate := r.URL.Query().Get("endDate")
 	category := r.URL.Query().Get("category")
-	userId := r.URL.Query().Get("userId")
-	userIdInt, _ := strconv.Atoi(userId)
 
-	expenses, statusCode, err := e.expenseService.GetExpenses(email, startDate, endDate, category, userIdInt)
-	if err != nil {
-		http.Error(w, err.Error(), statusCode)
-		return
+	if id == "" {
+		email := r.Context().Value("email").(string)
+		user, err := e.expenseService.GetUserByEmail(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		userId = user.Id
+	} else {
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		userId = idInt
+	}
+	if startDate != "" && endDate != "" {
+		startDateTime, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		endDateTime, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fetchedExpenses, err := e.expenseService.GetExpensesByDateRange(userId, startDateTime, endDateTime, category)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		expenses = fetchedExpenses
+	} else {
+		fetchedExpenses, err := e.expenseService.GetExpenses(userId, category)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		expenses = fetchedExpenses
 	}
 
-	w.WriteHeader(statusCode)
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(expenses)
 }
 

@@ -13,9 +13,11 @@ import (
 type ExpenseService interface {
 	GetExpenseById(expenseId int) (model.Expense, int, error)
 	CreateExpense(email string, requestBody request_model.ExpenseRequest) (model.Expense, int, error)
-	GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error)
+	GetExpenses(userId int, category string) ([]model.Expense, error)
+	GetExpensesByDateRange(userId int, startDate, endDate time.Time, category string) ([]model.Expense, error)
 	DeleteExpense(email string, expenseId int) (int, error)
 	UpdateExpense(expenseId string, requestBody request_model.ExpenseRequest) (int, error)
+	GetUserByEmail(email string) (model.User, error)
 }
 
 type expenseService struct {
@@ -69,40 +71,46 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 	return createdExpense, http.StatusCreated, nil
 }
 
-func (es *expenseService) GetExpenses(email, startDate, endDate, category string, userId int) ([]model.Expense, int, error) {
-	var expenses []model.Expense
-	if !(userId > 0) {
-		user, err := es.userService.GetUserByEmail(email)
-		if err != nil {
-			return nil, http.StatusInternalServerError, fmt.Errorf("no user found with email %s: %v", email, err)
-		}
-
-		userId = user.Id
+func (es *expenseService) GetExpenses(userId int, category string) ([]model.Expense, error) {
+	if userId <= 0 {
+		return []model.Expense{}, fmt.Errorf("user id must be greater than 0")
 	}
-
-	if startDate != "" && endDate != "" {
-		startDateTime, err := time.Parse("2006-01-02", startDate)
-		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to parse start date: %v", err)
-		}
-		endDateTime, err := time.Parse("2006-01-02", endDate)
-		if err != nil {
-			return nil, http.StatusBadRequest, fmt.Errorf("failed to parse end date: %v", err)
-		}
-		fetchedExpenses, err := es.expenseRepository.GetExpensesByDateRange(userId, startDateTime, endDateTime)
-		if err != nil {
-			return nil, http.StatusInternalServerError, fmt.Errorf("failed to get expenses: %v", err)
+	expenses, err := es.expenseRepository.GetExpenses(userId)
+	if err != nil {
+		return []model.Expense{}, fmt.Errorf("failed to get expenses: %v", err)
+	}
+	if category != "" {
+		var filteredExpenses []model.Expense
+		for _, expense := range expenses {
+			if expense.Category == category {
+				filteredExpenses = append(filteredExpenses, expense)
+			}
 		}
 
-		expenses = fetchedExpenses
+		expenses = filteredExpenses
 	} else {
-		fetchedExpenses, err := es.expenseRepository.GetExpenses(userId)
-		if err != nil {
-			return nil, http.StatusNotFound, fmt.Errorf("failed to get expenses: %v", err)
+		var filteredExpenses []model.Expense
+		for _, expense := range expenses {
+			if expense.Status == "pending" {
+				filteredExpenses = append(filteredExpenses, expense)
+			}
 		}
 
-		expenses = fetchedExpenses
+		expenses = filteredExpenses
 	}
+
+	return expenses, nil
+}
+
+func (es *expenseService) GetExpensesByDateRange(userId int, startDate, endDate time.Time, category string) ([]model.Expense, error) {
+	if userId <= 0 {
+		return []model.Expense{}, fmt.Errorf("user id must be greater than 0")
+	}
+	expenses, err := es.expenseRepository.GetExpensesByDateRange(userId, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get expenses: %v", err)
+	}
+
 	if category != "" {
 		var filteredExpenses []model.Expense
 		for _, expense := range expenses {
@@ -114,7 +122,7 @@ func (es *expenseService) GetExpenses(email, startDate, endDate, category string
 		expenses = filteredExpenses
 	}
 
-	return expenses, http.StatusOK, nil
+	return expenses, nil
 }
 
 func (es *expenseService) DeleteExpense(email string, expenseId int) (int, error) {
@@ -153,4 +161,13 @@ func (es *expenseService) UpdateExpense(expenseId string, requestBody request_mo
 	}
 
 	return http.StatusNoContent, nil
+}
+
+func (es *expenseService) GetUserByEmail(email string) (model.User, error) {
+	user, err := es.userService.GetUserByEmail(email)
+	if err != nil {
+		return model.User{}, fmt.Errorf("failed to get user: %v", err)
+	}
+
+	return user, nil
 }
