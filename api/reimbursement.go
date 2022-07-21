@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	requestModel "reimbursement_backend/api/request_model"
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 type ReimbursementController interface {
 	CreateReimbursement(w http.ResponseWriter, r *http.Request)
 	GetReimbursements(w http.ResponseWriter, r *http.Request)
+	ProcessReimbursements(w http.ResponseWriter, r *http.Request)
 }
 
 type reimbursementController struct {
@@ -25,11 +27,11 @@ func NewReimbursementController() *reimbursementController {
 
 func (rmb *reimbursementController) CreateReimbursement(w http.ResponseWriter, r *http.Request) {
 	var reimbursement model.Reimbursement
+
 	if err := json.NewDecoder(r.Body).Decode(&reimbursement); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	createdReimbursement, err := rmb.reimbursementService.CreateReimbursement(reimbursement)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -68,4 +70,20 @@ func (rmb *reimbursementController) GetReimbursements(w http.ResponseWriter, r *
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(reimbursements)
+}
+
+func (rmb *reimbursementController) ProcessReimbursements(w http.ResponseWriter, r *http.Request) {
+	var requestBody requestModel.ProcessReimbursementsRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err := rmb.reimbursementService.ProcessReimbursements(requestBody.UserId, requestBody.Status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

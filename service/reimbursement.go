@@ -10,6 +10,7 @@ type ReimbursementService interface {
 	CreateReimbursement(expense model.Reimbursement) (model.Reimbursement, error)
 	GetReimbursements(userId int) ([]model.Reimbursement, error)
 	GetUserByEmail(email string) (model.User, error)
+	ProcessReimbursements(userId int, status string) error
 }
 
 type reimbursementService struct {
@@ -49,4 +50,13 @@ func (rmb *reimbursementService) GetUserByEmail(email string) (model.User, error
 	}
 
 	return user, nil
+}
+
+func (rmb *reimbursementService) ProcessReimbursements(userId int, status string) error {
+	err := rmb.reimbursementRepository.ProcessReimbursements(userId, status)
+	if err != nil {
+		return fmt.Errorf("error processing reimbursements: %v", err)
+	}
+
+	return nil
 }

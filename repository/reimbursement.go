@@ -10,6 +10,7 @@ import (
 type ReimbursementRepository interface {
 	CreateReimbursement(reimbursement model.Reimbursement) (model.Reimbursement, error)
 	GetReimbursements(userId int) ([]model.Reimbursement, error)
+	ProcessReimbursements(userId int, status string) error
 }
 
 type reimbursementRepository struct {
@@ -60,4 +61,15 @@ func (rmb *reimbursementRepository) GetReimbursements(userId int) ([]model.Reimb
 	}
 
 	return reimbursements, nil
+}
+
+func (rmb *reimbursementRepository) ProcessReimbursements(userId int, status string) error {
+	sqlStatement := `UPDATE reimbursements SET status = $1 WHERE user_id = $2 AND status = $3`
+
+	_, err := rmb.db.Exec(sqlStatement, status, userId, "pending")
+	if err != nil {
+		return fmt.Errorf("repo: error processing reimbursements: %v", err)
+	}
+
+	return nil
 }
