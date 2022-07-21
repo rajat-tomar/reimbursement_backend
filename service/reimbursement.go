@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reimbursement_backend/model"
 	"reimbursement_backend/repository"
+	"time"
 )
 
 type ReimbursementService interface {
@@ -11,6 +12,7 @@ type ReimbursementService interface {
 	GetReimbursements(userId int) ([]model.Reimbursement, error)
 	GetUserByEmail(email string) (model.User, error)
 	ProcessReimbursements(userId int, status string) error
+	GetReimbursementsByDateRange(userId int, startDate, endDate time.Time) ([]model.Reimbursement, error)
 }
 
 type reimbursementService struct {
@@ -35,12 +37,22 @@ func (rmb *reimbursementService) CreateReimbursement(reimbursement model.Reimbur
 }
 
 func (rmb *reimbursementService) GetReimbursements(userId int) ([]model.Reimbursement, error) {
+	if userId <= 0 {
+		return nil, fmt.Errorf("user id must be greater than 0")
+	}
 	reimbursements, err := rmb.reimbursementRepository.GetReimbursements(userId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting expenses: %v", err)
 	}
 
-	return reimbursements, nil
+	var filteredReimbursements []model.Reimbursement
+	for _, reimbursement := range reimbursements {
+		if reimbursement.Status == "pending" {
+			filteredReimbursements = append(filteredReimbursements, reimbursement)
+		}
+	}
+
+	return filteredReimbursements, nil
 }
 
 func (rmb *reimbursementService) GetUserByEmail(email string) (model.User, error) {
@@ -59,4 +71,13 @@ func (rmb *reimbursementService) ProcessReimbursements(userId int, status string
 	}
 
 	return nil
+}
+
+func (rmb *reimbursementService) GetReimbursementsByDateRange(userId int, startDate, endDate time.Time) ([]model.Reimbursement, error) {
+	reimbursements, err := rmb.reimbursementRepository.GetReimbursementsByDateRange(userId, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("error getting reimbursements: %v", err)
+	}
+
+	return reimbursements, nil
 }

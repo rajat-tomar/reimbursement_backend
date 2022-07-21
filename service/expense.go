@@ -73,11 +73,11 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 
 func (es *expenseService) GetExpenses(userId int, category string) ([]model.Expense, error) {
 	if userId <= 0 {
-		return []model.Expense{}, fmt.Errorf("user id must be greater than 0")
+		return nil, fmt.Errorf("user id must be greater than 0")
 	}
 	expenses, err := es.expenseRepository.GetExpenses(userId)
 	if err != nil {
-		return []model.Expense{}, fmt.Errorf("failed to get expenses: %v", err)
+		return nil, fmt.Errorf("failed to get expenses: %v", err)
 	}
 	if category != "" {
 		var filteredExpenses []model.Expense

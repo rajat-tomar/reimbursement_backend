@@ -7,6 +7,7 @@ import (
 	"reimbursement_backend/model"
 	"reimbursement_backend/service"
 	"strconv"
+	"time"
 )
 
 type ReimbursementController interface {
@@ -43,8 +44,11 @@ func (rmb *reimbursementController) CreateReimbursement(w http.ResponseWriter, r
 }
 
 func (rmb *reimbursementController) GetReimbursements(w http.ResponseWriter, r *http.Request) {
+	var reimbursements []model.Reimbursement
 	var userId int
 	id := r.URL.Query().Get("userId")
+	startDate := r.URL.Query().Get("startDate")
+	endDate := r.URL.Query().Get("endDate")
 
 	if id == "" {
 		email := r.Context().Value("email").(string)
@@ -62,10 +66,32 @@ func (rmb *reimbursementController) GetReimbursements(w http.ResponseWriter, r *
 		}
 		userId = idInt
 	}
-	reimbursements, err := rmb.reimbursementService.GetReimbursements(userId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if startDate != "" && endDate != "" {
+		startDateTime, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		endDateTime, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fetchedReimbursements, err := rmb.reimbursementService.GetReimbursementsByDateRange(userId, startDateTime, endDateTime)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		reimbursements = fetchedReimbursements
+	} else {
+		fetchedReimbursements, err := rmb.reimbursementService.GetReimbursements(userId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		reimbursements = fetchedReimbursements
 	}
 
 	w.WriteHeader(http.StatusOK)
