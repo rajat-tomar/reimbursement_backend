@@ -1,39 +1,17 @@
-name: Deploy to Staging
-on:
-  push:
-    branches: [ main ]
+name: Deploy to Production
+on: [workflow_dispatch]
 jobs:
   build:
     name: Build & Test
     runs-on: self-hosted
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: reimbursement
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: reimbursement_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      golang:
-        image: golang:latest
     steps:
       - uses: actions/checkout@v3
-
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.2'
-
       - uses: actions/setup-node@v3
         with:
           node-version: '16'
-
       - name: Install golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-arm64.tar.gz | tar xvz
@@ -97,28 +75,28 @@ jobs:
           echo "  CA_EMAIL: ${{secrets.CA_EMAIL}}" >> config.yaml
 
       - name: Remove previous binary, database migrations and config.yaml file from remote instance
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;rm -rf db/migration/*"
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "rm -rf config.yaml;rm -rf reimbursement_backend;rm -rf db/migration/*"
 
       - name: Kill the process
         continue-on-error: true
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo kill -9 $(sudo lsof -t -i:${{secrets.SERVER_PORT}})"
 
       - name: Move config.yaml File to Remote
-        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no config.yaml reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}}:/home/reimbursement/config.yaml
+        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no config.yaml reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/config.yaml
 
       - name: Move Binary to Remote Instance
-        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
+        run: scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement_backend reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/reimbursement_backend
 
       - name: Move Migrations to Remote Instance
         run: |
-          ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "mkdir -p db/migration"
-          scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}}:/home/reimbursement/db/migration
+          ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "mkdir -p db/migration"
+          scp -i reimbursement_id_rsa -o StrictHostKeyChecking=no db/migration/* reimbursement@${{secrets.BACKEND_INSTANCE_IP}}:/home/reimbursement/db/migration
 
       - name: Change file access mode
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
 
       - name: Run Up Migrations
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "./reimbursement_backend migrate-up"
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "./reimbursement_backend migrate-up"
 
       - name: Start the service to run the updated binary
-        run: ssh -i reimbursement_id_rsa -o  StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_STAGING_INSTANCE_IP}} "sudo systemctl restart reimbursement.service"
+        run: ssh -i reimbursement_id_rsa -o  StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl restart reimbursement.service"
