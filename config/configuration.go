@@ -15,8 +15,8 @@ type Configuration struct {
 }
 
 type Email struct {
-	AdminEmail string `mapstructure:"ADMIN_EMAIL"`
-	CAEmail    string `mapstructure:"CA_EMAIL"`
+	AdminEmails []string `mapstructure:"ADMIN_EMAILS"`
+	CAEmail     string   `mapstructure:"CA_EMAIL"`
 }
 
 type DbConfig struct {

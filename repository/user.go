@@ -27,15 +27,21 @@ func (ur *userRepository) CreateUser(user model.User) (model.User, error) {
 	var createdUser model.User
 	var role string
 	sqlStatement := `INSERT INTO users(name, email, role) VALUES($1, $2, $3) RETURNING id, name, email, role`
-	adminEmail := config.Config.Email.AdminEmail
+	adminEmails := config.Config.Email.AdminEmails
 	caEmail := config.Config.Email.CAEmail
 
-	if user.Email == adminEmail {
-		role = "admin"
-	} else if user.Email == caEmail {
-		role = "ca"
-	} else {
-		role = "employee"
+	for _, email := range adminEmails {
+		if user.Email == email {
+			role = "admin"
+			break
+		}
+	}
+	if role == "" {
+		if user.Email == caEmail {
+			role = "ca"
+		} else {
+			role = "employee"
+		}
 	}
 	err := ur.db.QueryRow(sqlStatement, user.Name, user.Email, role).Scan(&createdUser.Id, &createdUser.Name, &createdUser.Email, &createdUser.Role)
 
