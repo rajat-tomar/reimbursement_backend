@@ -7,4 +7,5 @@ type ExpenseRequest struct {
 	ExpenseDate string `json:"expense_date,omitempty"`
 	UserId      int    `json:"user_id,omitempty"`
 	Status      string `json:"status,omitempty"`
+	ImageUrl    string `json:"image_url,omitempty"`
 }

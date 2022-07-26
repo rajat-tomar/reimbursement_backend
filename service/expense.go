@@ -57,15 +57,19 @@ func (es *expenseService) CreateExpense(email string, requestBody request_model.
 	if requestBody.Category == "" {
 		return model.Expense{}, http.StatusBadRequest, fmt.Errorf("category can't be empty")
 	}
+	if requestBody.ImageUrl == "" {
+		return model.Expense{}, http.StatusBadRequest, fmt.Errorf("image url can't be empty")
+	}
 	userId := user.Id
 	expenseDate, _ := time.Parse("2006-01-02", requestBody.ExpenseDate)
 	expense.Amount = requestBody.Amount
 	expense.Category = requestBody.Category
 	expense.ExpenseDate = expenseDate
 	expense.UserId = userId
+	expense.ImageUrl = requestBody.ImageUrl
 	createdExpense, err := es.expenseRepository.CreateExpense(userId, expense)
 	if err != nil {
-		return model.Expense{}, http.StatusFailedDependency, fmt.Errorf("failed to create expense: %v", err)
+		return model.Expense{}, http.StatusInternalServerError, fmt.Errorf("failed to create expense: %v", err)
 	}
 
 	return createdExpense, http.StatusCreated, nil
