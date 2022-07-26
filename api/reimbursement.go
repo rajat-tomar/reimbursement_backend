@@ -105,6 +105,10 @@ func (rmb *reimbursementController) ProcessReimbursements(w http.ResponseWriter,
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if requestBody.UserId <= 0 {
+		http.Error(w, "UserId must be greater than 0", http.StatusBadRequest)
+		return
+	}
 	err := rmb.reimbursementService.ProcessReimbursements(requestBody.UserId, requestBody.Status)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
