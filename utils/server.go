@@ -71,7 +71,7 @@ func RunServer() {
 	router := mux.NewRouter()
 	controllers := api.NewControllers()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "https://reimbursement.gaussb.io", "http://3.110.216.1"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://reimbursement.gaussb.io", "https://reimbursement.staging.gaussb.io"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Requested-With"},
 		ExposedHeaders:   []string{"Link"},
