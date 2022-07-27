@@ -113,7 +113,7 @@ jobs:
         run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "chmod +x reimbursement_backend;chmod +x config.yaml;"
 
       - name: Run Migrations
-        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "./reimbursement_backend migrate-down"
+        run: ssh -i reimbursement_id_rsa -o StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "./reimbursement_backend migrate-up"
 
       - name: Start the service to run the updated binary
         run: ssh -i reimbursement_id_rsa -o  StrictHostKeyChecking=no reimbursement@${{secrets.BACKEND_INSTANCE_IP}} "sudo systemctl restart reimbursement.service"
