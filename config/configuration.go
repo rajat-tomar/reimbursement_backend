@@ -12,6 +12,7 @@ type Configuration struct {
 	Migration      *Migration `mapstructure:"MIGRATION"`
 	Environment    string     `mapstructure:"ENVIRONMENT"`
 	Email          *Email     `mapstructure:"EMAIL"`
+	JWTKey         string     `mapstructure:"JWT_KEY"`
 }
 
 type Email struct {

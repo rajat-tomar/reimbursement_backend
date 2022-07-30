@@ -26,8 +26,10 @@ func (uc *userController) Login(w http.ResponseWriter, r *http.Request) {
 	var requestUser model.User
 	name := r.Context().Value("name")
 	email := r.Context().Value("email")
+	token := r.Context().Value("token")
 	requestUser.Name = name.(string)
 	requestUser.Email = email.(string)
+	tokenString := token.(string)
 
 	role, err := uc.userService.Login(requestUser)
 	if err != nil {
@@ -36,7 +38,12 @@ func (uc *userController) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	_ = json.NewEncoder(w).Encode(role)
+	data := map[string]string{
+		"token": tokenString,
+		"role":  role,
+	}
+
+	_ = json.NewEncoder(w).Encode(data)
 }
 
 func (uc *userController) GetUsers(w http.ResponseWriter, r *http.Request) {

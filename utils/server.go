@@ -36,28 +36,42 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+
 		reqToken := r.Header.Get("Authorization")
 		if reqToken == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-
-		splitToken := strings.Split(reqToken, " ")
-		if len(splitToken) != 2 {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		token := splitToken[1]
+		tokenString := strings.TrimPrefix(reqToken, "Bearer ")
 		ctx := context.Background()
-		payload, err := idtoken.Validate(ctx, token, config.Config.GoogleClientId)
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		ctx = context.WithValue(ctx, "email", payload.Claims["email"])
-		ctx = context.WithValue(ctx, "name", payload.Claims["name"])
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+		if r.URL.Path == "/login" {
+			payload, err := idtoken.Validate(ctx, tokenString, config.Config.GoogleClientId)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			name := payload.Claims["name"].(string)
+			email := payload.Claims["email"].(string)
+			generatedJwt, err := generateJWT(email, name)
+			ctx = context.WithValue(ctx, "name", name)
+			ctx = context.WithValue(ctx, "email", email)
+			ctx = context.WithValue(ctx, "token", generatedJwt)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			name, email, err := validateToken(tokenString)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			ctx = context.WithValue(ctx, "name", name)
+			ctx = context.WithValue(ctx, "email", email)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
 	})
 }
 
@@ -79,7 +93,7 @@ func RunServer() {
 		AllowCredentials: true,
 	})
 
-	router.Use(filterContentTypeMiddleware)
+	//router.Use(filterContentTypeMiddleware)
 	router.Use(authenticationMiddleware)
 	handler := c.Handler(router)
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
