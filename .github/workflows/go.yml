@@ -79,6 +79,7 @@ jobs:
       - name: Create config.yaml file
         run: |
           touch config.yaml
+          echo "JWT_KEY: ${{secrets.JWT_KEY}}" >> config.yaml
           echo "HTTP_PORT: ${{secrets.SERVER_PORT}}" >> config.yaml
           echo "GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}" >> config.yaml
           echo "DB:" >> config.yaml
